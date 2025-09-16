@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirComfy</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3">
+    <meta name="description" content="Minimal PWA for ComfyUI workflow execution">
+</head>
+<body>
+    <header>
+        <h1>AirComfy</h1>
+        <div class="connection-status" id="connectionStatus">Disconnected</div>
+    </header>
+
+    <main>
+        <section class="config-section">
+            <h2>ComfyUI Configuration</h2>
+            <div class="input-group">
+                <label for="serverUrl">Server URL:</label>
+                <input type="url" id="serverUrl" placeholder="http://localhost:8188" value="http://localhost:8188">
+            </div>
+            <button id="connectBtn" class="primary-btn">Connect</button>
+        </section>
+
+        <section class="workflow-section">
+            <h2>Workflow</h2>
+            <div class="workflow-input-area">
+                <div class="workflow-status" id="workflowStatus">No workflow loaded</div>
+                <div class="workflow-actions">
+                    <button id="uploadBtn" class="secondary-btn">
+                        📁 Upload JSON
+                    </button>
+                    <button id="pasteBtn" class="secondary-btn">
+                        📋 Paste from Clipboard
+                    </button>
+                    <button id="clearBtn" class="tertiary-btn">Clear</button>
+                </div>
+                <input type="file" id="fileInput" accept=".json" style="display: none;">
+            </div>
+            <div class="workflow-preview" id="workflowPreview" style="display: none;">
+                <h3>Workflow Preview</h3>
+                <pre id="workflowContent"></pre>
+            </div>
+            <div class="execution-actions">
+                <button id="validateBtn" class="secondary-btn">Validate</button>
+                <button id="executeBtn" class="primary-btn" disabled>Execute</button>
+            </div>
+        </section>
+
+        <section class="results-section">
+            <h2>Results</h2>
+            <div id="status" class="status-display"></div>
+            <div id="progress" class="progress-display"></div>
+            <div id="results" class="results-display"></div>
+        </section>
+    </main>
+
+    <script>
+        class AirComfy {
+            constructor() {
+                this.serverUrl = '';
+                this.clientId = this.generateClientId();
+                this.websocket = null;
+                this.currentPromptId = null;
+                this.currentWorkflow = null;
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.loadSettings();
+                this.registerServiceWorker();
+            }
+
+            bindEvents() {
+                document.getElementById('connectBtn').addEventListener('click', () => this.connect());
+                document.getElementById('validateBtn').addEventListener('click', () => this.validateWorkflow());
+                document.getElementById('executeBtn').addEventListener('click', () => this.executeWorkflow());
+                document.getElementById('serverUrl').addEventListener('input', (e) => this.saveSettings());
+
+                document.getElementById('uploadBtn').addEventListener('click', () => this.triggerFileUpload());
+                document.getElementById('pasteBtn').addEventListener('click', () => this.pasteFromClipboard());
+                document.getElementById('clearBtn').addEventListener('click', () => this.clearWorkflow());
+                document.getElementById('fileInput').addEventListener('change', (e) => this.handleFileUpload(e));
+            }
+
+            generateClientId() {
+                return Math.random().toString(36).substring(2) + Date.now().toString(36);
+            }
+
+            loadSettings() {
+                const saved = localStorage.getItem('aircomfy-settings');
+                if (saved) {
+                    const settings = JSON.parse(saved);
+                    document.getElementById('serverUrl').value = settings.serverUrl || 'http://localhost:8188';
+                }
+            }
+
+            saveSettings() {
+                const settings = {
+                    serverUrl: document.getElementById('serverUrl').value
+                };
+                localStorage.setItem('aircomfy-settings', JSON.stringify(settings));
+            }
+
+            async connect() {
+                const serverUrl = document.getElementById('serverUrl').value.trim();
+                if (!serverUrl) {
+                    this.updateStatus('Please enter a server URL', 'error');
+                    return;
+                }
+
+                this.serverUrl = serverUrl;
+                this.saveSettings();
+
+                try {
+                    const response = await fetch(`${this.serverUrl}/system_stats`, {
+                        mode: 'cors',
+                        credentials: 'omit'
+                    });
+                    if (response.ok) {
+                        this.updateConnectionStatus('Connected');
+                        this.connectWebSocket();
+                        document.getElementById('executeBtn').disabled = false;
+                        this.updateStatus('Connected to ComfyUI server', 'success');
+                    } else {
+                        throw new Error(`Server responded with ${response.status}`);
+                    }
+                } catch (error) {
+                    this.updateConnectionStatus('Disconnected');
+                    document.getElementById('executeBtn').disabled = true;
+
+                    if (error.message.includes('fetch') || error.name === 'TypeError') {
+                        this.updateStatus(`CORS blocked: Use proxy or serve PWA from ComfyUI server directly`, 'error');
+                    } else {
+                        this.updateStatus(`Connection failed: ${error.message}`, 'error');
+                    }
+                }
+            }
+
+            connectWebSocket() {
+                const wsUrl = this.serverUrl.replace('http', 'ws') + `/ws?clientId=${this.clientId}`;
+
+                if (this.websocket) {
+                    this.websocket.close();
+                }
+
+                this.websocket = new WebSocket(wsUrl);
+
+                this.websocket.onopen = () => {
+                    this.updateStatus('WebSocket connected', 'success');
+                };
+
+                this.websocket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    this.handleWebSocketMessage(data);
+                };
+
+                this.websocket.onclose = () => {
+                    this.updateStatus('WebSocket disconnected', 'warning');
+                };
+
+                this.websocket.onerror = (error) => {
+                    this.updateStatus('WebSocket error occurred', 'error');
+                };
+            }
+
+            handleWebSocketMessage(data) {
+                if (data.type === 'status') {
+                    this.updateProgress(`Queue: ${data.data.status.exec_info.queue_remaining}`);
+                } else if (data.type === 'progress') {
+                    const progress = Math.round((data.data.value / data.data.max) * 100);
+                    this.updateProgress(`Progress: ${progress}% (${data.data.node})`);
+                } else if (data.type === 'executed') {
+                    this.handleExecutionComplete(data.data);
+                }
+            }
+
+            triggerFileUpload() {
+                document.getElementById('fileInput').click();
+            }
+
+            async handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (!file.name.endsWith('.json')) {
+                    this.updateStatus('Please select a JSON file', 'error');
+                    return;
+                }
+
+                try {
+                    const text = await file.text();
+                    this.loadWorkflow(text, `Uploaded: ${file.name}`);
+                } catch (error) {
+                    this.updateStatus(`Failed to read file: ${error.message}`, 'error');
+                }
+
+                event.target.value = '';
+            }
+
+            async pasteFromClipboard() {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    if (!text.trim()) {
+                        this.updateStatus('Clipboard is empty', 'error');
+                        return;
+                    }
+                    this.loadWorkflow(text, 'Pasted from clipboard');
+                } catch (error) {
+                    this.updateStatus('Failed to read clipboard. Use Ctrl+V manually.', 'error');
+                }
+            }
+
+            loadWorkflow(workflowText, source) {
+                try {
+                    const workflow = JSON.parse(workflowText);
+                    if (typeof workflow !== 'object' || !workflow) {
+                        throw new Error('Invalid JSON format');
+                    }
+
+                    this.currentWorkflow = workflow;
+
+                    document.getElementById('workflowStatus').textContent = source;
+                    document.getElementById('workflowContent').textContent = JSON.stringify(workflow, null, 2);
+                    document.getElementById('workflowPreview').style.display = 'block';
+
+                    this.updateStatus('Workflow loaded successfully', 'success');
+                } catch (error) {
+                    this.updateStatus(`Invalid workflow: ${error.message}`, 'error');
+                }
+            }
+
+            clearWorkflow() {
+                this.currentWorkflow = null;
+                document.getElementById('workflowStatus').textContent = 'No workflow loaded';
+                document.getElementById('workflowPreview').style.display = 'none';
+                this.updateStatus('Workflow cleared', 'info');
+            }
+
+            validateWorkflow() {
+                if (!this.currentWorkflow) {
+                    this.updateStatus('Please load a workflow first', 'error');
+                    return false;
+                }
+
+                try {
+                    if (typeof this.currentWorkflow !== 'object' || !this.currentWorkflow) {
+                        throw new Error('Invalid workflow format');
+                    }
+                    this.updateStatus('Workflow validation passed', 'success');
+                    return true;
+                } catch (error) {
+                    this.updateStatus(`Workflow validation failed: ${error.message}`, 'error');
+                    return false;
+                }
+            }
+
+            async executeWorkflow() {
+                if (!this.validateWorkflow()) return;
+                if (!this.serverUrl) {
+                    this.updateStatus('Please connect to server first', 'error');
+                    return;
+                }
+
+                const promptData = {
+                    prompt: this.currentWorkflow,
+                    client_id: this.clientId
+                };
+
+                try {
+                    this.updateStatus('Submitting workflow...', 'info');
+                    const response = await fetch(`${this.serverUrl}/prompt`, {
+                        method: 'POST',
+                        mode: 'cors',
+                        credentials: 'omit',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(promptData)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        this.currentPromptId = result.prompt_id;
+                        this.updateStatus(`Workflow submitted. Prompt ID: ${this.currentPromptId}`, 'success');
+                    } else {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+                } catch (error) {
+                    this.updateStatus(`Execution failed: ${error.message}`, 'error');
+                }
+            }
+
+            async handleExecutionComplete(data) {
+                if (data.prompt_id === this.currentPromptId) {
+                    this.updateStatus('Workflow execution completed', 'success');
+                    this.updateProgress('Complete');
+
+                    try {
+                        const historyResponse = await fetch(`${this.serverUrl}/history/${this.currentPromptId}`, {
+                            mode: 'cors',
+                            credentials: 'omit'
+                        });
+                        if (historyResponse.ok) {
+                            const history = await historyResponse.json();
+                            this.displayResults(history);
+                        }
+                    } catch (error) {
+                        this.updateStatus(`Failed to fetch results: ${error.message}`, 'error');
+                    }
+                }
+            }
+
+            displayResults(history) {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '';
+
+                for (const [promptId, promptData] of Object.entries(history)) {
+                    if (promptData.outputs) {
+                        for (const [nodeId, nodeOutput] of Object.entries(promptData.outputs)) {
+                            if (nodeOutput.images) {
+                                nodeOutput.images.forEach(image => {
+                                    const img = document.createElement('img');
+                                    img.src = `${this.serverUrl}/view?filename=${image.filename}&subfolder=${image.subfolder}&type=${image.type}`;
+                                    img.alt = `Generated image from node ${nodeId}`;
+                                    img.className = 'result-image';
+                                    resultsDiv.appendChild(img);
+                                });
+                            }
+                        }
+                    }
+                }
+
+                if (resultsDiv.innerHTML === '') {
+                    resultsDiv.innerHTML = '<p>No images generated</p>';
+                }
+            }
+
+            updateConnectionStatus(status) {
+                const element = document.getElementById('connectionStatus');
+                element.textContent = status;
+                element.className = `connection-status ${status.toLowerCase()}`;
+            }
+
+            updateStatus(message, type = 'info') {
+                const element = document.getElementById('status');
+                element.textContent = message;
+                element.className = `status-display ${type}`;
+            }
+
+            updateProgress(message) {
+                document.getElementById('progress').textContent = message;
+            }
+
+            async registerServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    try {
+                        await navigator.serviceWorker.register('./sw.js');
+                    } catch (error) {
+                        console.warn('Service Worker registration failed');
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new AirComfy();
+        });
+    </script>
+</body>
+</html>
