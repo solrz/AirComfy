@@ -6,6 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BE34FE1C2E7AA715009F41D8 /* sw.js in Resources */ = {isa = PBXBuildFile; fileRef = BE34FE192E7AA715009F41D8 /* sw.js */; };
+		BE34FE1D2E7AA715009F41D8 /* worker.js in Resources */ = {isa = PBXBuildFile; fileRef = BE34FE1A2E7AA715009F41D8 /* worker.js */; };
+		BE34FE1E2E7AA715009F41D8 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = BE34FE172E7AA715009F41D8 /* manifest.json */; };
+		BE34FE1F2E7AA715009F41D8 /* style.css in Resources */ = {isa = PBXBuildFile; fileRef = BE34FE182E7AA715009F41D8 /* style.css */; };
+		BE34FE202E7AA715009F41D8 /* icon-192.png in Resources */ = {isa = PBXBuildFile; fileRef = BE34FE152E7AA715009F41D8 /* icon-192.png */; };
+		BE34FE212E7AA715009F41D8 /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = BE34FE162E7AA715009F41D8 /* index.html */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		BE34FDCF2E7A8420009F41D8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +36,12 @@
 		BE34FDC12E7A841E009F41D8 /* AirComfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirComfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE34FDCE2E7A8420009F41D8 /* AirComfyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AirComfyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE34FDD82E7A8420009F41D8 /* AirComfyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AirComfyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE34FE152E7AA715009F41D8 /* icon-192.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-192.png"; sourceTree = "<group>"; };
+		BE34FE162E7AA715009F41D8 /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
+		BE34FE172E7AA715009F41D8 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
+		BE34FE182E7AA715009F41D8 /* style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = style.css; sourceTree = "<group>"; };
+		BE34FE192E7AA715009F41D8 /* sw.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = sw.js; sourceTree = "<group>"; };
+		BE34FE1A2E7AA715009F41D8 /* worker.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = worker.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +90,7 @@
 		BE34FDB82E7A841E009F41D8 = {
 			isa = PBXGroup;
 			children = (
+				BE34FE1B2E7AA715009F41D8 /* PWA */,
 				BE34FDC32E7A841E009F41D8 /* AirComfy */,
 				BE34FDD12E7A8420009F41D8 /* AirComfyTests */,
 				BE34FDDB2E7A8420009F41D8 /* AirComfyUITests */,
@@ -91,6 +107,20 @@
 			);
 			name = Products;
 			sourceTree = "<group>";
+		};
+		BE34FE1B2E7AA715009F41D8 /* PWA */ = {
+			isa = PBXGroup;
+			children = (
+				BE34FE152E7AA715009F41D8 /* icon-192.png */,
+				BE34FE162E7AA715009F41D8 /* index.html */,
+				BE34FE172E7AA715009F41D8 /* manifest.json */,
+				BE34FE182E7AA715009F41D8 /* style.css */,
+				BE34FE192E7AA715009F41D8 /* sw.js */,
+				BE34FE1A2E7AA715009F41D8 /* worker.js */,
+			);
+			name = PWA;
+			path = ../PWA;
+			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
@@ -212,6 +242,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BE34FE1C2E7AA715009F41D8 /* sw.js in Resources */,
+				BE34FE1D2E7AA715009F41D8 /* worker.js in Resources */,
+				BE34FE1E2E7AA715009F41D8 /* manifest.json in Resources */,
+				BE34FE1F2E7AA715009F41D8 /* style.css in Resources */,
+				BE34FE202E7AA715009F41D8 /* icon-192.png in Resources */,
+				BE34FE212E7AA715009F41D8 /* index.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
