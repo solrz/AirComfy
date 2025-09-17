@@ -12,7 +12,7 @@
 </head>
 <body v-scope="AirComfyApp()" @vue:mounted="mounted">
     <header>
-        <h1>AirComfy</h1>
+        <h1>AirComfy <span v-if="debugMode" class="debug-badge">DEBUG</span></h1>
         <div class="connection-status" :class="connectionStatus.toLowerCase()">
             {{ connectionStatus }}
         </div>
@@ -23,6 +23,13 @@
         <div v-show="currentView === 'main'" class="view">
             <section class="config-section">
                 <h2>ComfyUI Configuration</h2>
+                <div class="debug-controls" v-if="debugMode">
+                    <button @click="toggleDebugMode" class="debug-btn">🐛 Debug Mode: ON</button>
+                    <button @click="clearDebugPresets" class="tertiary-btn">Clear Debug Presets</button>
+                </div>
+                <div class="debug-controls" v-else>
+                    <button @click="toggleDebugMode" class="tertiary-btn">🐛 Enable Debug Mode</button>
+                </div>
                 <div class="input-group">
                     <label for="serverEndpoint">Server Endpoint:</label>
                     <div class="endpoint-selector">
@@ -133,6 +140,7 @@
                 progress: '',
                 resultImages: [],
                 newEndpoint: { name: '', url: '' },
+                debugMode: false,
 
                 // Computed properties
                 get canExecute() {
@@ -148,10 +156,140 @@
                     this.loadEndpoints();
                     this.loadSettings();
                     this.registerServiceWorker();
+                    this.checkDebugMode();
                 },
 
                 generateClientId() {
                     return Math.random().toString(36).substring(2) + Date.now().toString(36);
+                },
+
+                // Debug mode management
+                checkDebugMode() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.has('debug')) {
+                        this.debugMode = urlParams.get('debug') === 'true';
+                        this.saveSettings();
+
+                        if (this.debugMode) {
+                            this.loadDebugPresets();
+                        }
+                    }
+                },
+
+                async loadDebugPresets() {
+                    // Load preset workflow
+                    const debugWorkflow = localStorage.getItem('aircomfy-debug-workflow');
+                    if (debugWorkflow) {
+                        this.loadWorkflow(debugWorkflow, 'Debug preset workflow loaded');
+                    } else {
+                        // Default SD15 workflow for testing
+                        const defaultWorkflow = {
+                            "3": {
+                                "inputs": {
+                                    "seed": 156680208700286,
+                                    "steps": 20,
+                                    "cfg": 8,
+                                    "sampler_name": "euler",
+                                    "scheduler": "normal",
+                                    "denoise": 1,
+                                    "model": ["4", 0],
+                                    "positive": ["6", 0],
+                                    "negative": ["7", 0],
+                                    "latent_image": ["5", 0]
+                                },
+                                "class_type": "KSampler"
+                            },
+                            "4": {
+                                "inputs": {
+                                    "ckpt_name": "v1-5-pruned-emaonly.safetensors"
+                                },
+                                "class_type": "CheckpointLoaderSimple"
+                            },
+                            "5": {
+                                "inputs": {
+                                    "width": 512,
+                                    "height": 512,
+                                    "batch_size": 1
+                                },
+                                "class_type": "EmptyLatentImage"
+                            },
+                            "6": {
+                                "inputs": {
+                                    "text": "beautiful scenery nature glass bottle landscape, purple galaxy bottle",
+                                    "clip": ["4", 1]
+                                },
+                                "class_type": "CLIPTextEncode"
+                            },
+                            "7": {
+                                "inputs": {
+                                    "text": "text, watermark",
+                                    "clip": ["4", 1]
+                                },
+                                "class_type": "CLIPTextEncode"
+                            },
+                            "8": {
+                                "inputs": {
+                                    "samples": ["3", 0],
+                                    "vae": ["4", 2]
+                                },
+                                "class_type": "VAEDecode"
+                            },
+                            "9": {
+                                "inputs": {
+                                    "filename_prefix": "ComfyUI",
+                                    "images": ["8", 0]
+                                },
+                                "class_type": "SaveImage"
+                            }
+                        };
+                        this.loadWorkflow(JSON.stringify(defaultWorkflow), 'Debug preset workflow loaded');
+                    }
+
+                    // Load preset endpoint
+                    const debugEndpointId = localStorage.getItem('aircomfy-debug-endpoint');
+                    if (debugEndpointId && this.endpoints.find(e => e.id === debugEndpointId)) {
+                        this.selectedEndpointId = debugEndpointId;
+                        this.selectEndpoint();
+                    } else {
+                        // Use first available endpoint or localhost
+                        const localEndpoint = this.endpoints.find(e => e.url.includes('localhost:8188'));
+                        if (localEndpoint) {
+                            this.selectedEndpointId = localEndpoint.id;
+                            this.selectEndpoint();
+                        } else if (this.endpoints.length > 0) {
+                            this.selectedEndpointId = this.endpoints[0].id;
+                            this.selectEndpoint();
+                        }
+                    }
+
+                    // Auto-connect if endpoint is selected
+                    if (this.selectedEndpointId) {
+                        setTimeout(() => this.connect(), 500);
+                    }
+                },
+
+                toggleDebugMode() {
+                    this.debugMode = !this.debugMode;
+                    this.saveSettings();
+
+                    if (this.debugMode) {
+                        // Save current state as debug presets
+                        if (this.currentWorkflow) {
+                            localStorage.setItem('aircomfy-debug-workflow', JSON.stringify(this.currentWorkflow));
+                        }
+                        if (this.selectedEndpointId) {
+                            localStorage.setItem('aircomfy-debug-endpoint', this.selectedEndpointId);
+                        }
+                        this.updateStatus('Debug mode enabled - presets saved', 'info');
+                    } else {
+                        this.updateStatus('Debug mode disabled', 'info');
+                    }
+                },
+
+                clearDebugPresets() {
+                    localStorage.removeItem('aircomfy-debug-workflow');
+                    localStorage.removeItem('aircomfy-debug-endpoint');
+                    this.updateStatus('Debug presets cleared', 'info');
                 },
 
                 // Settings management
@@ -160,6 +298,7 @@
                     if (saved) {
                         const settings = JSON.parse(saved);
                         this.selectedEndpointId = settings.selectedEndpointId || '';
+                        this.debugMode = settings.debugMode || false;
                         if (this.selectedEndpointId) {
                             const endpoint = this.endpoints.find(e => e.id === this.selectedEndpointId);
                             if (endpoint) {
@@ -171,7 +310,8 @@
 
                 saveSettings() {
                     const settings = {
-                        selectedEndpointId: this.selectedEndpointId
+                        selectedEndpointId: this.selectedEndpointId,
+                        debugMode: this.debugMode
                     };
                     localStorage.setItem('aircomfy-settings', JSON.stringify(settings));
                 },
