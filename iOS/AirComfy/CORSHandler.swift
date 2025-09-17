@@ -1,10 +1,3 @@
-//
-//  CORSHandler.swift
-//  AirComfy
-//
-//  Created by App開發 on 2025/9/17.
-//
-
 import Foundation
 import WebKit
 

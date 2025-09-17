@@ -7,40 +7,40 @@
 	objects = {
 
 /* Begin PBXContainerItemProxy section */
-		BE29D3782E79CEF500248AD3 /* PBXContainerItemProxy */ = {
+		BE34FDCF2E7A8420009F41D8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = BE29D3622E79CEF300248AD3 /* Project object */;
+			containerPortal = BE34FDB92E7A841E009F41D8 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = BE29D3692E79CEF300248AD3;
+			remoteGlobalIDString = BE34FDC02E7A841E009F41D8;
 			remoteInfo = AirComfy;
 		};
-		BE29D3822E79CEF500248AD3 /* PBXContainerItemProxy */ = {
+		BE34FDD92E7A8420009F41D8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = BE29D3622E79CEF300248AD3 /* Project object */;
+			containerPortal = BE34FDB92E7A841E009F41D8 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = BE29D3692E79CEF300248AD3;
+			remoteGlobalIDString = BE34FDC02E7A841E009F41D8;
 			remoteInfo = AirComfy;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		BE29D36A2E79CEF300248AD3 /* AirComfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirComfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		BE29D3772E79CEF500248AD3 /* AirComfyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AirComfyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		BE29D3812E79CEF500248AD3 /* AirComfyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AirComfyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE34FDC12E7A841E009F41D8 /* AirComfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirComfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE34FDCE2E7A8420009F41D8 /* AirComfyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AirComfyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE34FDD82E7A8420009F41D8 /* AirComfyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AirComfyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		BE29D36C2E79CEF300248AD3 /* AirComfy */ = {
+		BE34FDC32E7A841E009F41D8 /* AirComfy */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = AirComfy;
 			sourceTree = "<group>";
 		};
-		BE29D37A2E79CEF500248AD3 /* AirComfyTests */ = {
+		BE34FDD12E7A8420009F41D8 /* AirComfyTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = AirComfyTests;
 			sourceTree = "<group>";
 		};
-		BE29D3842E79CEF500248AD3 /* AirComfyUITests */ = {
+		BE34FDDB2E7A8420009F41D8 /* AirComfyUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = AirComfyUITests;
 			sourceTree = "<group>";
@@ -48,21 +48,21 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		BE29D3672E79CEF300248AD3 /* Frameworks */ = {
+		BE34FDBE2E7A841E009F41D8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		BE29D3742E79CEF500248AD3 /* Frameworks */ = {
+		BE34FDCB2E7A8420009F41D8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		BE29D37E2E79CEF500248AD3 /* Frameworks */ = {
+		BE34FDD52E7A8420009F41D8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -72,22 +72,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		BE29D3612E79CEF300248AD3 = {
+		BE34FDB82E7A841E009F41D8 = {
 			isa = PBXGroup;
 			children = (
-				BE29D36C2E79CEF300248AD3 /* AirComfy */,
-				BE29D37A2E79CEF500248AD3 /* AirComfyTests */,
-				BE29D3842E79CEF500248AD3 /* AirComfyUITests */,
-				BE29D36B2E79CEF300248AD3 /* Products */,
+				BE34FDC32E7A841E009F41D8 /* AirComfy */,
+				BE34FDD12E7A8420009F41D8 /* AirComfyTests */,
+				BE34FDDB2E7A8420009F41D8 /* AirComfyUITests */,
+				BE34FDC22E7A841E009F41D8 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		BE29D36B2E79CEF300248AD3 /* Products */ = {
+		BE34FDC22E7A841E009F41D8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BE29D36A2E79CEF300248AD3 /* AirComfy.app */,
-				BE29D3772E79CEF500248AD3 /* AirComfyTests.xctest */,
-				BE29D3812E79CEF500248AD3 /* AirComfyUITests.xctest */,
+				BE34FDC12E7A841E009F41D8 /* AirComfy.app */,
+				BE34FDCE2E7A8420009F41D8 /* AirComfyTests.xctest */,
+				BE34FDD82E7A8420009F41D8 /* AirComfyUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,134 +95,134 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		BE29D3692E79CEF300248AD3 /* AirComfy */ = {
+		BE34FDC02E7A841E009F41D8 /* AirComfy */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BE29D38B2E79CEF500248AD3 /* Build configuration list for PBXNativeTarget "AirComfy" */;
+			buildConfigurationList = BE34FDE22E7A8420009F41D8 /* Build configuration list for PBXNativeTarget "AirComfy" */;
 			buildPhases = (
-				BE29D3662E79CEF300248AD3 /* Sources */,
-				BE29D3672E79CEF300248AD3 /* Frameworks */,
-				BE29D3682E79CEF300248AD3 /* Resources */,
+				BE34FDBD2E7A841E009F41D8 /* Sources */,
+				BE34FDBE2E7A841E009F41D8 /* Frameworks */,
+				BE34FDBF2E7A841E009F41D8 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				BE29D36C2E79CEF300248AD3 /* AirComfy */,
+				BE34FDC32E7A841E009F41D8 /* AirComfy */,
 			);
 			name = AirComfy;
 			packageProductDependencies = (
 			);
 			productName = AirComfy;
-			productReference = BE29D36A2E79CEF300248AD3 /* AirComfy.app */;
+			productReference = BE34FDC12E7A841E009F41D8 /* AirComfy.app */;
 			productType = "com.apple.product-type.application";
 		};
-		BE29D3762E79CEF500248AD3 /* AirComfyTests */ = {
+		BE34FDCD2E7A8420009F41D8 /* AirComfyTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BE29D38E2E79CEF500248AD3 /* Build configuration list for PBXNativeTarget "AirComfyTests" */;
+			buildConfigurationList = BE34FDE52E7A8420009F41D8 /* Build configuration list for PBXNativeTarget "AirComfyTests" */;
 			buildPhases = (
-				BE29D3732E79CEF500248AD3 /* Sources */,
-				BE29D3742E79CEF500248AD3 /* Frameworks */,
-				BE29D3752E79CEF500248AD3 /* Resources */,
+				BE34FDCA2E7A8420009F41D8 /* Sources */,
+				BE34FDCB2E7A8420009F41D8 /* Frameworks */,
+				BE34FDCC2E7A8420009F41D8 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				BE29D3792E79CEF500248AD3 /* PBXTargetDependency */,
+				BE34FDD02E7A8420009F41D8 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				BE29D37A2E79CEF500248AD3 /* AirComfyTests */,
+				BE34FDD12E7A8420009F41D8 /* AirComfyTests */,
 			);
 			name = AirComfyTests;
 			packageProductDependencies = (
 			);
 			productName = AirComfyTests;
-			productReference = BE29D3772E79CEF500248AD3 /* AirComfyTests.xctest */;
+			productReference = BE34FDCE2E7A8420009F41D8 /* AirComfyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		BE29D3802E79CEF500248AD3 /* AirComfyUITests */ = {
+		BE34FDD72E7A8420009F41D8 /* AirComfyUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BE29D3912E79CEF500248AD3 /* Build configuration list for PBXNativeTarget "AirComfyUITests" */;
+			buildConfigurationList = BE34FDE82E7A8420009F41D8 /* Build configuration list for PBXNativeTarget "AirComfyUITests" */;
 			buildPhases = (
-				BE29D37D2E79CEF500248AD3 /* Sources */,
-				BE29D37E2E79CEF500248AD3 /* Frameworks */,
-				BE29D37F2E79CEF500248AD3 /* Resources */,
+				BE34FDD42E7A8420009F41D8 /* Sources */,
+				BE34FDD52E7A8420009F41D8 /* Frameworks */,
+				BE34FDD62E7A8420009F41D8 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				BE29D3832E79CEF500248AD3 /* PBXTargetDependency */,
+				BE34FDDA2E7A8420009F41D8 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				BE29D3842E79CEF500248AD3 /* AirComfyUITests */,
+				BE34FDDB2E7A8420009F41D8 /* AirComfyUITests */,
 			);
 			name = AirComfyUITests;
 			packageProductDependencies = (
 			);
 			productName = AirComfyUITests;
-			productReference = BE29D3812E79CEF500248AD3 /* AirComfyUITests.xctest */;
+			productReference = BE34FDD82E7A8420009F41D8 /* AirComfyUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		BE29D3622E79CEF300248AD3 /* Project object */ = {
+		BE34FDB92E7A841E009F41D8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
-					BE29D3692E79CEF300248AD3 = {
+					BE34FDC02E7A841E009F41D8 = {
 						CreatedOnToolsVersion = 16.4;
 					};
-					BE29D3762E79CEF500248AD3 = {
+					BE34FDCD2E7A8420009F41D8 = {
 						CreatedOnToolsVersion = 16.4;
-						TestTargetID = BE29D3692E79CEF300248AD3;
+						TestTargetID = BE34FDC02E7A841E009F41D8;
 					};
-					BE29D3802E79CEF500248AD3 = {
+					BE34FDD72E7A8420009F41D8 = {
 						CreatedOnToolsVersion = 16.4;
-						TestTargetID = BE29D3692E79CEF300248AD3;
+						TestTargetID = BE34FDC02E7A841E009F41D8;
 					};
 				};
 			};
-			buildConfigurationList = BE29D3652E79CEF300248AD3 /* Build configuration list for PBXProject "AirComfy" */;
+			buildConfigurationList = BE34FDBC2E7A841E009F41D8 /* Build configuration list for PBXProject "AirComfy" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = BE29D3612E79CEF300248AD3;
+			mainGroup = BE34FDB82E7A841E009F41D8;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = BE29D36B2E79CEF300248AD3 /* Products */;
+			productRefGroup = BE34FDC22E7A841E009F41D8 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BE29D3692E79CEF300248AD3 /* AirComfy */,
-				BE29D3762E79CEF500248AD3 /* AirComfyTests */,
-				BE29D3802E79CEF500248AD3 /* AirComfyUITests */,
+				BE34FDC02E7A841E009F41D8 /* AirComfy */,
+				BE34FDCD2E7A8420009F41D8 /* AirComfyTests */,
+				BE34FDD72E7A8420009F41D8 /* AirComfyUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		BE29D3682E79CEF300248AD3 /* Resources */ = {
+		BE34FDBF2E7A841E009F41D8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		BE29D3752E79CEF500248AD3 /* Resources */ = {
+		BE34FDCC2E7A8420009F41D8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		BE29D37F2E79CEF500248AD3 /* Resources */ = {
+		BE34FDD62E7A8420009F41D8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -232,21 +232,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		BE29D3662E79CEF300248AD3 /* Sources */ = {
+		BE34FDBD2E7A841E009F41D8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		BE29D3732E79CEF500248AD3 /* Sources */ = {
+		BE34FDCA2E7A8420009F41D8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		BE29D37D2E79CEF500248AD3 /* Sources */ = {
+		BE34FDD42E7A8420009F41D8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -256,20 +256,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		BE29D3792E79CEF500248AD3 /* PBXTargetDependency */ = {
+		BE34FDD02E7A8420009F41D8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = BE29D3692E79CEF300248AD3 /* AirComfy */;
-			targetProxy = BE29D3782E79CEF500248AD3 /* PBXContainerItemProxy */;
+			target = BE34FDC02E7A841E009F41D8 /* AirComfy */;
+			targetProxy = BE34FDCF2E7A8420009F41D8 /* PBXContainerItemProxy */;
 		};
-		BE29D3832E79CEF500248AD3 /* PBXTargetDependency */ = {
+		BE34FDDA2E7A8420009F41D8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = BE29D3692E79CEF300248AD3 /* AirComfy */;
-			targetProxy = BE29D3822E79CEF500248AD3 /* PBXContainerItemProxy */;
+			target = BE34FDC02E7A841E009F41D8 /* AirComfy */;
+			targetProxy = BE34FDD92E7A8420009F41D8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		BE29D3892E79CEF500248AD3 /* Debug */ = {
+		BE34FDE02E7A8420009F41D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -304,7 +304,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = CR8ZDV9W3F;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -333,7 +332,7 @@
 			};
 			name = Debug;
 		};
-		BE29D38A2E79CEF500248AD3 /* Release */ = {
+		BE34FDE12E7A8420009F41D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -368,7 +367,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = CR8ZDV9W3F;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -390,17 +388,15 @@
 			};
 			name = Release;
 		};
-		BE29D38C2E79CEF500248AD3 /* Debug */ = {
+		BE34FDE32E7A8420009F41D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CR8ZDV9W3F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSAppTransportSecurity = "{ NSAllowsArbitraryLoads = YES; NSAllowsLocalNetworking = YES; }";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -419,17 +415,15 @@
 			};
 			name = Debug;
 		};
-		BE29D38D2E79CEF500248AD3 /* Release */ = {
+		BE34FDE42E7A8420009F41D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CR8ZDV9W3F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSAppTransportSecurity = "{ NSAllowsArbitraryLoads = YES; NSAllowsLocalNetworking = YES; }";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -448,13 +442,12 @@
 			};
 			name = Release;
 		};
-		BE29D38F2E79CEF500248AD3 /* Debug */ = {
+		BE34FDE62E7A8420009F41D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CR8ZDV9W3F;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				MARKETING_VERSION = 1.0;
@@ -467,13 +460,12 @@
 			};
 			name = Debug;
 		};
-		BE29D3902E79CEF500248AD3 /* Release */ = {
+		BE34FDE72E7A8420009F41D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CR8ZDV9W3F;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				MARKETING_VERSION = 1.0;
@@ -486,12 +478,11 @@
 			};
 			name = Release;
 		};
-		BE29D3922E79CEF500248AD3 /* Debug */ = {
+		BE34FDE92E7A8420009F41D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CR8ZDV9W3F;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.seropoint.AirComfyUITests;
@@ -503,12 +494,11 @@
 			};
 			name = Debug;
 		};
-		BE29D3932E79CEF500248AD3 /* Release */ = {
+		BE34FDEA2E7A8420009F41D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CR8ZDV9W3F;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.seropoint.AirComfyUITests;
@@ -523,43 +513,43 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BE29D3652E79CEF300248AD3 /* Build configuration list for PBXProject "AirComfy" */ = {
+		BE34FDBC2E7A841E009F41D8 /* Build configuration list for PBXProject "AirComfy" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BE29D3892E79CEF500248AD3 /* Debug */,
-				BE29D38A2E79CEF500248AD3 /* Release */,
+				BE34FDE02E7A8420009F41D8 /* Debug */,
+				BE34FDE12E7A8420009F41D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BE29D38B2E79CEF500248AD3 /* Build configuration list for PBXNativeTarget "AirComfy" */ = {
+		BE34FDE22E7A8420009F41D8 /* Build configuration list for PBXNativeTarget "AirComfy" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BE29D38C2E79CEF500248AD3 /* Debug */,
-				BE29D38D2E79CEF500248AD3 /* Release */,
+				BE34FDE32E7A8420009F41D8 /* Debug */,
+				BE34FDE42E7A8420009F41D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BE29D38E2E79CEF500248AD3 /* Build configuration list for PBXNativeTarget "AirComfyTests" */ = {
+		BE34FDE52E7A8420009F41D8 /* Build configuration list for PBXNativeTarget "AirComfyTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BE29D38F2E79CEF500248AD3 /* Debug */,
-				BE29D3902E79CEF500248AD3 /* Release */,
+				BE34FDE62E7A8420009F41D8 /* Debug */,
+				BE34FDE72E7A8420009F41D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BE29D3912E79CEF500248AD3 /* Build configuration list for PBXNativeTarget "AirComfyUITests" */ = {
+		BE34FDE82E7A8420009F41D8 /* Build configuration list for PBXNativeTarget "AirComfyUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BE29D3922E79CEF500248AD3 /* Debug */,
-				BE29D3932E79CEF500248AD3 /* Release */,
+				BE34FDE92E7A8420009F41D8 /* Debug */,
+				BE34FDEA2E7A8420009F41D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = BE29D3622E79CEF300248AD3 /* Project object */;
+	rootObject = BE34FDB92E7A841E009F41D8 /* Project object */;
 }

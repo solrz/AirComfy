@@ -66,6 +66,7 @@
                 this.websocket = null;
                 this.currentPromptId = null;
                 this.currentWorkflow = null;
+                this.isIOSApp = window.webkit && window.webkit.messageHandlers;
                 this.init();
             }
 
@@ -91,17 +92,6 @@
                 return Math.random().toString(36).substring(2) + Date.now().toString(36);
             }
 
-            isInApp() {
-                return window.location.protocol === 'file:';
-            }
-
-            getProxyUrl(url) {
-                if (this.isInApp()) {
-                    return url.replace('http://', 'comfyproxy://').replace('https://', 'comfyproxy://');
-                }
-                return url;
-            }
-
             loadSettings() {
                 const saved = localStorage.getItem('aircomfy-settings');
                 if (saved) {
@@ -117,6 +107,13 @@
                 localStorage.setItem('aircomfy-settings', JSON.stringify(settings));
             }
 
+            getProxiedUrl(url) {
+                if (this.isIOSApp) {
+                    return url.replace('http://', 'comfyproxy://').replace('https://', 'comfyproxy://');
+                }
+                return url;
+            }
+
             async connect() {
                 const serverUrl = document.getElementById('serverUrl').value.trim();
                 if (!serverUrl) {
@@ -128,8 +125,8 @@
                 this.saveSettings();
 
                 try {
-                    const proxyUrl = this.getProxyUrl(`${this.serverUrl}/system_stats`);
-                    const response = await fetch(proxyUrl, {
+                    const fetchUrl = this.getProxiedUrl(`${this.serverUrl}/system_stats`);
+                    const response = await fetch(fetchUrl, {
                         mode: 'cors',
                         credentials: 'omit'
                     });
@@ -146,7 +143,7 @@
                     document.getElementById('executeBtn').disabled = true;
 
                     if (error.message.includes('fetch') || error.name === 'TypeError') {
-                        this.updateStatus(`CORS blocked: Use proxy or serve PWA from ComfyUI server directly`, 'error');
+                        this.updateStatus(this.isIOSApp ? `Connection failed: ${error.message}` : `CORS blocked: Use proxy or serve PWA from ComfyUI server directly`, 'error');
                     } else {
                         this.updateStatus(`Connection failed: ${error.message}`, 'error');
                     }
@@ -154,21 +151,13 @@
             }
 
             connectWebSocket() {
-                let wsUrl = this.serverUrl.replace('http', 'ws') + `/ws?clientId=${this.clientId}`;
-
-                // Don't proxy WebSocket connections - they work directly
-                // WebSocket connections don't have CORS restrictions
+                const wsUrl = this.serverUrl.replace('http', 'ws') + `/ws?clientId=${this.clientId}`;
 
                 if (this.websocket) {
                     this.websocket.close();
                 }
 
-                try {
-                    this.websocket = new WebSocket(wsUrl);
-                } catch (error) {
-                    this.updateStatus(`WebSocket connection failed: ${error.message}`, 'error');
-                    return;
-                }
+                this.websocket = new WebSocket(wsUrl);
 
                 this.websocket.onopen = () => {
                     this.updateStatus('WebSocket connected', 'success');
@@ -293,8 +282,7 @@
 
                 try {
                     this.updateStatus('Submitting workflow...', 'info');
-                    const proxyUrl = this.getProxyUrl(`${this.serverUrl}/prompt`);
-                    const response = await fetch(proxyUrl, {
+                    const response = await fetch(this.getProxiedUrl(`${this.serverUrl}/prompt`), {
                         method: 'POST',
                         mode: 'cors',
                         credentials: 'omit',
@@ -322,8 +310,7 @@
                     this.updateProgress('Complete');
 
                     try {
-                        const proxyUrl = this.getProxyUrl(`${this.serverUrl}/history/${this.currentPromptId}`);
-                        const historyResponse = await fetch(proxyUrl, {
+                        const historyResponse = await fetch(this.getProxiedUrl(`${this.serverUrl}/history/${this.currentPromptId}`), {
                             mode: 'cors',
                             credentials: 'omit'
                         });
@@ -347,8 +334,7 @@
                             if (nodeOutput.images) {
                                 nodeOutput.images.forEach(image => {
                                     const img = document.createElement('img');
-                                    const imageUrl = `${this.serverUrl}/view?filename=${image.filename}&subfolder=${image.subfolder}&type=${image.type}`;
-                                    img.src = this.getProxyUrl(imageUrl);
+                                    img.src = `${this.serverUrl}/view?filename=${image.filename}&subfolder=${image.subfolder}&type=${image.type}`;
                                     img.alt = `Generated image from node ${nodeId}`;
                                     img.className = 'result-image';
                                     resultsDiv.appendChild(img);
@@ -380,7 +366,7 @@
             }
 
             async registerServiceWorker() {
-                if ('serviceWorker' in navigator) {
+                if (!this.isIOSApp && 'serviceWorker' in navigator) {
                     try {
                         await navigator.serviceWorker.register('./sw.js');
                     } catch (error) {
