@@ -330,20 +330,10 @@
                         return;
                     }
 
-                    // Check if workflow already has the correct structure
-                    let promptData;
-                    if (this.currentWorkflow.prompt && this.currentWorkflow.client_id) {
-                        // Already in correct format (pre-wrapped)
-                        promptData = this.currentWorkflow;
-                        // Update client_id to current session
-                        promptData.client_id = this.clientId;
-                    } else {
-                        // Raw workflow nodes - need to wrap
-                        promptData = {
-                            prompt: this.currentWorkflow,
-                            client_id: this.clientId
-                        };
-                    }
+                    const promptData = {
+                        prompt: this.currentWorkflow,
+                        client_id: this.clientId
+                    };
 
                     try {
                         this.updateStatus('Submitting workflow...', 'info');
