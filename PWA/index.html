@@ -16,16 +16,23 @@
     </header>
 
     <main>
-        <section class="config-section">
-            <h2>ComfyUI Configuration</h2>
-            <div class="input-group">
-                <label for="serverUrl">Server URL:</label>
-                <input type="url" id="serverUrl" placeholder="http://localhost:8188" value="http://localhost:8188">
-            </div>
-            <button id="connectBtn" class="primary-btn">Connect</button>
-        </section>
+        <!-- Main View -->
+        <div id="mainView" class="view">
+            <section class="config-section">
+                <h2>ComfyUI Configuration</h2>
+                <div class="input-group">
+                    <label for="serverEndpoint">Server Endpoint:</label>
+                    <div class="endpoint-selector">
+                        <select id="serverEndpoint" class="endpoint-dropdown">
+                            <option value="">Select an endpoint...</option>
+                        </select>
+                        <button id="manageEndpointsBtn" class="secondary-btn">Manage Endpoints</button>
+                    </div>
+                </div>
+                <button id="connectBtn" class="primary-btn">Connect</button>
+            </section>
 
-        <section class="workflow-section">
+            <section class="workflow-section">
             <h2>Workflow</h2>
             <div class="workflow-input-area">
                 <div class="workflow-status" id="workflowStatus">No workflow loaded</div>
@@ -48,14 +55,44 @@
                 <button id="validateBtn" class="secondary-btn">Validate</button>
                 <button id="executeBtn" class="primary-btn" disabled>Execute</button>
             </div>
-        </section>
+            </section>
 
-        <section class="results-section">
+            <section class="results-section">
             <h2>Results</h2>
             <div id="status" class="status-display"></div>
             <div id="progress" class="progress-display"></div>
             <div id="results" class="results-display"></div>
-        </section>
+            </section>
+        </div>
+
+        <!-- Endpoint Manager View -->
+        <div id="endpointManagerView" class="view" style="display: none;">
+            <section class="endpoint-manager-section">
+                <div class="view-header">
+                    <h2>Manage Endpoints</h2>
+                    <button id="backToMainBtn" class="secondary-btn">← Back</button>
+                </div>
+                
+                <div class="endpoint-form">
+                    <h3>Add New Endpoint</h3>
+                    <div class="input-group">
+                        <label for="endpointName">Endpoint Name:</label>
+                        <input type="text" id="endpointName" placeholder="e.g., Local Server">
+                    </div>
+                    <div class="input-group">
+                        <label for="endpointUrl">Endpoint URL:</label>
+                        <input type="url" id="endpointUrl" placeholder="http://localhost:8188">
+                    </div>
+                    <button id="addEndpointBtn" class="primary-btn">Add Endpoint</button>
+                </div>
+
+                <div class="endpoint-list">
+                    <h3>Saved Endpoints</h3>
+                    <div id="endpointsList"></div>
+                    <p id="noEndpointsMessage" class="no-endpoints-message">No endpoints saved yet.</p>
+                </div>
+            </section>
+        </div>
     </main>
 
     <script>
@@ -66,25 +103,35 @@
                 this.websocket = null;
                 this.currentPromptId = null;
                 this.currentWorkflow = null;
+                this.endpoints = [];
+                this.selectedEndpointId = null;
                 this.init();
             }
 
             init() {
+                this.loadEndpoints();
                 this.bindEvents();
                 this.loadSettings();
                 this.registerServiceWorker();
+                this.updateEndpointDropdown();
             }
 
             bindEvents() {
+                // Main view events
                 document.getElementById('connectBtn').addEventListener('click', () => this.connect());
                 document.getElementById('validateBtn').addEventListener('click', () => this.validateWorkflow());
                 document.getElementById('executeBtn').addEventListener('click', () => this.executeWorkflow());
-                document.getElementById('serverUrl').addEventListener('input', (e) => this.saveSettings());
+                document.getElementById('serverEndpoint').addEventListener('change', (e) => this.selectEndpoint(e.target.value));
+                document.getElementById('manageEndpointsBtn').addEventListener('click', () => this.showEndpointManager());
 
                 document.getElementById('uploadBtn').addEventListener('click', () => this.triggerFileUpload());
                 document.getElementById('pasteBtn').addEventListener('click', () => this.pasteFromClipboard());
                 document.getElementById('clearBtn').addEventListener('click', () => this.clearWorkflow());
                 document.getElementById('fileInput').addEventListener('change', (e) => this.handleFileUpload(e));
+
+                // Endpoint manager events
+                document.getElementById('backToMainBtn').addEventListener('click', () => this.showMainView());
+                document.getElementById('addEndpointBtn').addEventListener('click', () => this.addEndpoint());
             }
 
             generateClientId() {
@@ -95,25 +142,30 @@
                 const saved = localStorage.getItem('aircomfy-settings');
                 if (saved) {
                     const settings = JSON.parse(saved);
-                    document.getElementById('serverUrl').value = settings.serverUrl || 'http://localhost:8188';
+                    this.selectedEndpointId = settings.selectedEndpointId || null;
+                    if (this.selectedEndpointId) {
+                        document.getElementById('serverEndpoint').value = this.selectedEndpointId;
+                        const endpoint = this.endpoints.find(e => e.id === this.selectedEndpointId);
+                        if (endpoint) {
+                            this.serverUrl = endpoint.url;
+                        }
+                    }
                 }
             }
 
             saveSettings() {
                 const settings = {
-                    serverUrl: document.getElementById('serverUrl').value
+                    selectedEndpointId: this.selectedEndpointId
                 };
                 localStorage.setItem('aircomfy-settings', JSON.stringify(settings));
             }
 
             async connect() {
-                const serverUrl = document.getElementById('serverUrl').value.trim();
-                if (!serverUrl) {
-                    this.updateStatus('Please enter a server URL', 'error');
+                if (!this.serverUrl) {
+                    this.updateStatus('Please select a server endpoint', 'error');
                     return;
                 }
 
-                this.serverUrl = serverUrl;
                 this.saveSettings();
 
                 try {
@@ -364,6 +416,200 @@
                         console.warn('Service Worker registration failed');
                     }
                 }
+            }
+
+            // Endpoint Management Functions
+            loadEndpoints() {
+                const saved = localStorage.getItem('aircomfy-endpoints');
+                if (saved) {
+                    this.endpoints = JSON.parse(saved);
+                } else {
+                    // Add default endpoint
+                    this.endpoints = [
+                        {
+                            id: this.generateEndpointId(),
+                            name: 'Local Server',
+                            url: 'http://localhost:8188'
+                        }
+                    ];
+                    this.saveEndpoints();
+                }
+            }
+
+            saveEndpoints() {
+                localStorage.setItem('aircomfy-endpoints', JSON.stringify(this.endpoints));
+            }
+
+            generateEndpointId() {
+                return 'endpoint-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+            }
+
+            showEndpointManager() {
+                document.getElementById('mainView').style.display = 'none';
+                document.getElementById('endpointManagerView').style.display = 'block';
+                this.renderEndpointsList();
+            }
+
+            showMainView() {
+                document.getElementById('endpointManagerView').style.display = 'none';
+                document.getElementById('mainView').style.display = 'block';
+                this.updateEndpointDropdown();
+            }
+
+            selectEndpoint(endpointId) {
+                const endpoint = this.endpoints.find(e => e.id === endpointId);
+                if (endpoint) {
+                    this.selectedEndpointId = endpointId;
+                    this.serverUrl = endpoint.url;
+                    this.saveSettings();
+                    this.updateConnectionStatus('Disconnected');
+                    document.getElementById('executeBtn').disabled = true;
+                } else {
+                    this.selectedEndpointId = null;
+                    this.serverUrl = '';
+                }
+            }
+
+            updateEndpointDropdown() {
+                const select = document.getElementById('serverEndpoint');
+                const currentValue = select.value;
+                
+                // Clear existing options except the first placeholder
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+                
+                // Add endpoints
+                this.endpoints.forEach(endpoint => {
+                    const option = document.createElement('option');
+                    option.value = endpoint.id;
+                    option.textContent = `${endpoint.name} (${endpoint.url})`;
+                    select.appendChild(option);
+                });
+                
+                // Restore selected value if it still exists
+                if (currentValue && this.endpoints.find(e => e.id === currentValue)) {
+                    select.value = currentValue;
+                } else if (this.selectedEndpointId && this.endpoints.find(e => e.id === this.selectedEndpointId)) {
+                    select.value = this.selectedEndpointId;
+                }
+            }
+
+            addEndpoint() {
+                const name = document.getElementById('endpointName').value.trim();
+                const url = document.getElementById('endpointUrl').value.trim();
+                
+                if (!name || !url) {
+                    alert('Please enter both name and URL for the endpoint');
+                    return;
+                }
+                
+                try {
+                    new URL(url); // Validate URL format
+                } catch (e) {
+                    alert('Please enter a valid URL');
+                    return;
+                }
+                
+                const endpoint = {
+                    id: this.generateEndpointId(),
+                    name: name,
+                    url: url
+                };
+                
+                this.endpoints.push(endpoint);
+                this.saveEndpoints();
+                this.renderEndpointsList();
+                
+                // Clear form
+                document.getElementById('endpointName').value = '';
+                document.getElementById('endpointUrl').value = '';
+            }
+
+            deleteEndpoint(endpointId) {
+                if (confirm('Are you sure you want to delete this endpoint?')) {
+                    this.endpoints = this.endpoints.filter(e => e.id !== endpointId);
+                    this.saveEndpoints();
+                    
+                    // Clear selection if deleted endpoint was selected
+                    if (this.selectedEndpointId === endpointId) {
+                        this.selectedEndpointId = null;
+                        this.serverUrl = '';
+                        this.saveSettings();
+                    }
+                    
+                    this.renderEndpointsList();
+                }
+            }
+
+            editEndpoint(endpointId) {
+                const endpoint = this.endpoints.find(e => e.id === endpointId);
+                if (endpoint) {
+                    const newName = prompt('Enter new name:', endpoint.name);
+                    if (newName && newName.trim()) {
+                        const newUrl = prompt('Enter new URL:', endpoint.url);
+                        if (newUrl && newUrl.trim()) {
+                            try {
+                                new URL(newUrl); // Validate URL format
+                                endpoint.name = newName.trim();
+                                endpoint.url = newUrl.trim();
+                                this.saveEndpoints();
+                                
+                                // Update server URL if this endpoint is selected
+                                if (this.selectedEndpointId === endpointId) {
+                                    this.serverUrl = endpoint.url;
+                                }
+                                
+                                this.renderEndpointsList();
+                            } catch (e) {
+                                alert('Please enter a valid URL');
+                            }
+                        }
+                    }
+                }
+            }
+
+            renderEndpointsList() {
+                const listContainer = document.getElementById('endpointsList');
+                const noEndpointsMessage = document.getElementById('noEndpointsMessage');
+                
+                if (this.endpoints.length === 0) {
+                    listContainer.innerHTML = '';
+                    noEndpointsMessage.style.display = 'block';
+                    return;
+                }
+                
+                noEndpointsMessage.style.display = 'none';
+                listContainer.innerHTML = '';
+                
+                this.endpoints.forEach(endpoint => {
+                    const endpointItem = document.createElement('div');
+                    endpointItem.className = 'endpoint-item';
+                    endpointItem.innerHTML = `
+                        <div class="endpoint-info">
+                            <div class="endpoint-name">${endpoint.name}</div>
+                            <div class="endpoint-url">${endpoint.url}</div>
+                        </div>
+                        <div class="endpoint-actions">
+                            <button class="icon-btn edit-btn" title="Edit" data-id="${endpoint.id}">✏️</button>
+                            <button class="icon-btn delete-btn" title="Delete" data-id="${endpoint.id}">🗑️</button>
+                        </div>
+                    `;
+                    listContainer.appendChild(endpointItem);
+                });
+                
+                // Add event listeners to edit and delete buttons
+                listContainer.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.editEndpoint(e.target.dataset.id);
+                    });
+                });
+                
+                listContainer.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.deleteEndpoint(e.target.dataset.id);
+                    });
+                });
             }
         }
 
