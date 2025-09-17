@@ -42,22 +42,61 @@ final class CORSHandler: NSObject, WKURLSchemeHandler {
         }
 
         var request = URLRequest(url: targetURL)
-        request.httpMethod = originalRequest.httpMethod
-        request.allHTTPHeaderFields = originalRequest.allHTTPHeaderFields
-        request.httpBody = originalRequest.httpBody
+        request.httpMethod = originalRequest.httpMethod ?? "GET"
+        request.timeoutInterval = 30.0
 
-        Constants.corsHeaders.forEach { key, value in
-            request.setValue(value, forHTTPHeaderField: key)
+        // Copy headers
+        if let headers = originalRequest.allHTTPHeaderFields {
+            for (key, value) in headers {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+        }
+
+        // Handle POST body
+        if let bodyData = originalRequest.httpBody {
+            request.httpBody = bodyData
+        } else if let bodyStream = originalRequest.httpBodyStream {
+            // Handle streamed body
+            bodyStream.open()
+            let bufferSize = 1024
+            let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+            defer {
+                buffer.deallocate()
+                bodyStream.close()
+            }
+
+            var bodyData = Data()
+            while bodyStream.hasBytesAvailable {
+                let bytesRead = bodyStream.read(buffer, maxLength: bufferSize)
+                if bytesRead > 0 {
+                    bodyData.append(buffer, count: bytesRead)
+                }
+            }
+            request.httpBody = bodyData
         }
 
         return request
     }
 
     private func executeRequest(_ request: URLRequest, for urlSchemeTask: WKURLSchemeTask) {
+        print("CORSHandler: Executing request to \(request.url?.absoluteString ?? "unknown")")
+        print("CORSHandler: Method: \(request.httpMethod ?? "GET")")
+        print("CORSHandler: Headers: \(request.allHTTPHeaderFields ?? [:])")
+
+        if let body = request.httpBody {
+            print("CORSHandler: Body size: \(body.count) bytes")
+        }
+
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
+                print("CORSHandler: Request failed with error: \(error)")
                 urlSchemeTask.didFailWithError(error)
                 return
+            }
+
+            print("CORSHandler: Response received")
+            if let httpResponse = response as? HTTPURLResponse {
+                print("CORSHandler: Status code: \(httpResponse.statusCode)")
             }
 
             do {
@@ -65,11 +104,14 @@ final class CORSHandler: NSObject, WKURLSchemeHandler {
                 urlSchemeTask.didReceive(modifiedResponse)
 
                 if let data = data {
+                    print("CORSHandler: Sending \(data.count) bytes of data")
                     urlSchemeTask.didReceive(data)
                 }
 
                 urlSchemeTask.didFinish()
+                print("CORSHandler: Request completed successfully")
             } catch {
+                print("CORSHandler: Failed to process response: \(error)")
                 urlSchemeTask.didFailWithError(error)
             }
         }.resume()

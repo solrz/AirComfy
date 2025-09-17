@@ -20,7 +20,7 @@
             <h2>ComfyUI Configuration</h2>
             <div class="input-group">
                 <label for="serverUrl">Server URL:</label>
-                <input type="url" id="serverUrl" placeholder="http://localhost:8188" value="http://localhost:8188">
+                <input type="url" id="serverUrl" placeholder="http://192.168.11.132:8188" value="http://192.168.11.132:8188">
             </div>
             <button id="connectBtn" class="primary-btn">Connect</button>
         </section>
@@ -35,6 +35,9 @@
                     </button>
                     <button id="pasteBtn" class="secondary-btn">
                         📋 Paste from Clipboard
+                    </button>
+                    <button id="testBtn" class="secondary-btn">
+                        🧪 Load Test Workflow
                     </button>
                     <button id="clearBtn" class="tertiary-btn">Clear</button>
                 </div>
@@ -84,6 +87,7 @@
 
                 document.getElementById('uploadBtn').addEventListener('click', () => this.triggerFileUpload());
                 document.getElementById('pasteBtn').addEventListener('click', () => this.pasteFromClipboard());
+                document.getElementById('testBtn').addEventListener('click', () => this.loadTestWorkflow());
                 document.getElementById('clearBtn').addEventListener('click', () => this.clearWorkflow());
                 document.getElementById('fileInput').addEventListener('change', (e) => this.handleFileUpload(e));
             }
@@ -96,7 +100,7 @@
                 const saved = localStorage.getItem('aircomfy-settings');
                 if (saved) {
                     const settings = JSON.parse(saved);
-                    document.getElementById('serverUrl').value = settings.serverUrl || 'http://localhost:8188';
+                    document.getElementById('serverUrl').value = settings.serverUrl || 'http://192.168.11.132:8188';
                 }
             }
 
@@ -151,6 +155,11 @@
             }
 
             connectWebSocket() {
+                if (this.isIOSApp) {
+                    this.updateStatus('Using polling for iOS (WebSocket not supported)', 'info');
+                    return;
+                }
+
                 const wsUrl = this.serverUrl.replace('http', 'ws') + `/ws?clientId=${this.clientId}`;
 
                 if (this.websocket) {
@@ -224,6 +233,71 @@
                 }
             }
 
+            loadTestWorkflow() {
+                const testWorkflow = {
+                    "3": {
+                        "inputs": {
+                            "seed": 156680208700286,
+                            "steps": 20,
+                            "cfg": 8,
+                            "sampler_name": "euler",
+                            "scheduler": "normal",
+                            "denoise": 1,
+                            "model": ["4", 0],
+                            "positive": ["6", 0],
+                            "negative": ["7", 0],
+                            "latent_image": ["5", 0]
+                        },
+                        "class_type": "KSampler",
+                        "_meta": { "title": "K采样器" }
+                    },
+                    "4": {
+                        "inputs": { "ckpt_name": "v1-5-pruned-emaonly.safetensors" },
+                        "class_type": "CheckpointLoaderSimple",
+                        "_meta": { "title": "Checkpoint加载器（简易）" }
+                    },
+                    "5": {
+                        "inputs": { "width": 512, "height": 512, "batch_size": 1 },
+                        "class_type": "EmptyLatentImage",
+                        "_meta": { "title": "空Latent图像" }
+                    },
+                    "6": {
+                        "inputs": {
+                            "text": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,",
+                            "clip": ["4", 1]
+                        },
+                        "class_type": "CLIPTextEncode",
+                        "_meta": { "title": "CLIP文本编码" }
+                    },
+                    "7": {
+                        "inputs": {
+                            "text": "text, watermark",
+                            "clip": ["4", 1]
+                        },
+                        "class_type": "CLIPTextEncode",
+                        "_meta": { "title": "CLIP文本编码" }
+                    },
+                    "8": {
+                        "inputs": {
+                            "samples": ["3", 0],
+                            "vae": ["4", 2]
+                        },
+                        "class_type": "VAEDecode",
+                        "_meta": { "title": "VAE解码" }
+                    },
+                    "9": {
+                        "inputs": {
+                            "filename_prefix": "ComfyUI",
+                            "images": ["8", 0]
+                        },
+                        "class_type": "SaveImage",
+                        "_meta": { "title": "保存图像" }
+                    }
+                };
+
+                this.loadWorkflow(JSON.stringify(testWorkflow), 'Test workflow (SD15-basicT2I)');
+            }
+
             loadWorkflow(workflowText, source) {
                 try {
                     const workflow = JSON.parse(workflowText);
@@ -282,6 +356,7 @@
 
                 try {
                     this.updateStatus('Submitting workflow...', 'info');
+                    console.log('Sending workflow:', promptData);
                     const response = await fetch(this.getProxiedUrl(`${this.serverUrl}/prompt`), {
                         method: 'POST',
                         mode: 'cors',
@@ -295,11 +370,19 @@
                     if (response.ok) {
                         const result = await response.json();
                         this.currentPromptId = result.prompt_id;
+                        console.log('Workflow submitted with prompt ID:', this.currentPromptId);
                         this.updateStatus(`Workflow submitted. Prompt ID: ${this.currentPromptId}`, 'success');
+
+                        if (this.isIOSApp) {
+                            this.startPolling();
+                        }
                     } else {
-                        throw new Error(`Server error: ${response.status}`);
+                        const errorText = await response.text();
+                        console.error('Server error response:', errorText);
+                        throw new Error(`Server error: ${response.status} - ${errorText}`);
                     }
                 } catch (error) {
+                    console.error('Execution failed:', error);
                     this.updateStatus(`Execution failed: ${error.message}`, 'error');
                 }
             }
@@ -325,6 +408,7 @@
             }
 
             displayResults(history) {
+                console.log('displayResults called with:', history);
                 const resultsDiv = document.getElementById('results');
                 resultsDiv.innerHTML = '';
 
@@ -334,9 +418,15 @@
                             if (nodeOutput.images) {
                                 nodeOutput.images.forEach(image => {
                                     const img = document.createElement('img');
-                                    img.src = `${this.serverUrl}/view?filename=${image.filename}&subfolder=${image.subfolder}&type=${image.type}`;
+                                    const imageUrl = `${this.serverUrl}/view?filename=${image.filename}&subfolder=${image.subfolder}&type=${image.type}`;
+                                    img.src = this.getProxiedUrl(imageUrl);
                                     img.alt = `Generated image from node ${nodeId}`;
                                     img.className = 'result-image';
+                                    img.onerror = () => {
+                                        console.log(`Failed to load image: ${img.src}`);
+                                        img.alt = 'Failed to load image';
+                                    };
+                                    console.log(`Adding image: ${img.src}`);
                                     resultsDiv.appendChild(img);
                                 });
                             }
@@ -363,6 +453,42 @@
 
             updateProgress(message) {
                 document.getElementById('progress').textContent = message;
+            }
+
+            startPolling() {
+                if (!this.currentPromptId) return;
+
+                console.log('Starting polling for prompt ID:', this.currentPromptId);
+                this.updateProgress('Polling for results...');
+
+                const pollInterval = setInterval(async () => {
+                    try {
+                        const response = await fetch(this.getProxiedUrl(`${this.serverUrl}/history/${this.currentPromptId}`), {
+                            mode: 'cors',
+                            credentials: 'omit'
+                        });
+
+                        if (response.ok) {
+                            const history = await response.json();
+                            console.log('Polling response:', history);
+
+                            if (history && Object.keys(history).length > 0) {
+                                clearInterval(pollInterval);
+                                this.updateStatus('Workflow execution completed', 'success');
+                                this.updateProgress('Complete');
+                                this.displayResults(history);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Polling error:', error);
+                        this.updateProgress('Polling...');
+                    }
+                }, 2000);
+
+                setTimeout(() => {
+                    clearInterval(pollInterval);
+                    this.updateStatus('Polling timeout - check results manually', 'warning');
+                }, 60000);
             }
 
             async registerServiceWorker() {
