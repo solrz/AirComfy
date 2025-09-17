@@ -4,76 +4,104 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AirComfy is a minimal static Progressive Web App (PWA) designed to send workflows directly to a ComfyUI API. This project focuses on simplicity, offline functionality, and direct API integration without unnecessary complexity.
+AirComfy is a minimal Progressive Web App (PWA) and native iOS app for sending workflows to ComfyUI API. The project maintains a zero-dependency approach for maximum simplicity and reliability.
 
 ## Architecture
 
-**Core Philosophy**: Minimal complexity, maximum functionality
-- **Single Page Application**: All functionality consolidated in index.html
-- **No Framework Dependencies**: Pure HTML/CSS/JavaScript implementation
-- **Direct API Integration**: Uses native fetch API to communicate with ComfyUI endpoints
-- **PWA Features**: Service Worker caching and offline capability
+### Core Components
 
-## File Structure
+1. **PWA (PWA/ directory)**
+   - Single page application with all logic in index.html
+   - Service worker (sw.js) for offline support
+   - Direct ComfyUI API integration via fetch/WebSocket
+   - Cloudflare Worker deployment option (worker.js)
 
-```
-AirComfy/
-├── index.html          # Main application interface and logic
-├── manifest.json       # PWA configuration and metadata
-├── sw.js              # Service Worker for caching and offline support
-├── style.css          # Minimal responsive styling
-└── icon-192.png       # PWA icon (192x192px minimum)
-```
+2. **iOS App (iOS/ directory)**
+   - SwiftUI WebView wrapper loading PWA
+   - CORSHandler.swift for proxying requests via comfyproxy:// scheme
+   - ContentView.swift manages WebView lifecycle
+
+3. **CORS Proxy Options**
+   - proxy.py: Python aiohttp proxy with WebSocket support
+   - worker.js: Cloudflare Worker for global deployment
+   - CORSHandler.swift: iOS native proxy via custom URL scheme
 
 ## Development Commands
 
-Since this is a static PWA with no build process:
+### PWA Development
+```bash
+python -m http.server 8000  # Local dev server
+python proxy.py --port 8080 --comfyui http://192.168.11.132:8188  # CORS proxy
+python test_aircomfy.py  # Selenium tests
+```
 
-- **Development**: Open `index.html` in browser or use `python -m http.server 8000`
-- **Testing**: Use browser developer tools to test PWA features
-- **Deployment**: Copy all files to any web server or CDN
+### iOS Development
+```bash
+xcodebuild -project iOS/AirComfy.xcodeproj -scheme AirComfy -sdk iphonesimulator
+```
 
 ## ComfyUI API Integration
 
-**Primary Endpoint**: `POST /prompt`
-- Accepts JSON workflow data
-- Returns prompt_id for tracking execution
-- Requires client_id for WebSocket connection
+### Core Endpoints
+- `POST /prompt` - Submit workflow (requires prompt object and client_id)
+- `GET /history/{prompt_id}` - Fetch execution results
+- `GET /view` - Download generated images (params: filename, subfolder, type)
+- `WS /ws?clientId={id}` - Real-time progress updates
 
-**Additional Endpoints**:
-- `GET /history/{prompt_id}` - Retrieve execution results
-- `GET /view?filename={name}&subfolder={path}&type={type}` - Download generated images
-- WebSocket connection for real-time progress updates
+### Workflow Format
+```json
+{
+  "nodes": {
+    "1": {
+      "class_type": "LoadImage",
+      "inputs": {}
+    }
+  }
+}
+```
 
 ## Key Implementation Details
 
-**Error Handling**: Unified try-catch wrapper for all network operations
-**Offline Support**: Service Worker caches critical files for offline usage
-**Mobile-First**: Responsive design optimized for mobile devices
-**Validation**: JSON workflow validation before API submission
-**CORS Handling**: ComfyUI doesn't support CORS headers - use proxy or serve PWA from same origin
+### AirComfy Class (PWA/index.html:62-368)
+- Manages server connection, workflow validation, and execution
+- WebSocket handling for real-time progress
+- LocalStorage for settings persistence
+- Client ID generation for session tracking
 
-## Code Conventions
+### CORS Solutions
+1. **Cloudflare Worker**: Deploy via worker.js, serves PWA and proxies API
+2. **Python Proxy**: proxy.py provides local CORS proxy with WebSocket support
+3. **iOS Native**: CORSHandler converts comfyproxy:// to http:// with CORS headers
 
-- **No Comments**: Code should be self-documenting
-- **Minimal Indentation**: Maximum 3 levels of nesting
-- **Direct DOM Manipulation**: No jQuery or similar libraries
-- **ES6+ Features**: Use modern JavaScript where supported
-- **Security**: Never log or expose API keys or sensitive data
+### PWA Requirements
+- HTTPS required for service worker registration
+- manifest.json defines app metadata and icons
+- sw.js implements cache-first strategy for offline support
 
-## Testing Strategy
+## Testing
 
-- **Manual Testing**: Browser-based testing of core functionality
-- **PWA Testing**: Use Chrome DevTools Lighthouse for PWA compliance
-- **API Testing**: Test against local ComfyUI instance
-- **Offline Testing**: Verify service worker caching behavior
+### Selenium Tests (test_aircomfy.py)
+- Page load verification
+- UI element presence
+- Form interactions
+- Workflow validation
+- Connection handling
+- Responsive design
+- PWA features
 
-## Deployment Notes
+Run with: `python test_aircomfy.py`
 
-- **Static Hosting**: Can be deployed to GitHub Pages, Netlify, or any static host
-- **HTTPS Required**: PWA features require secure connection
-- **CORS Workarounds**: Since ComfyUI doesn't support CORS:
-  - **Option 1**: Cloudflare Worker (recommended) - Free, global, zero-config
-  - **Option 2**: Copy PWA files to ComfyUI's web directory
-  - **Option 3**: Run simple proxy server (see proxy.py)
-  - **Option 4**: Use nginx/apache proxy with CORS headers
+## Deployment
+
+### Cloudflare Worker
+1. Edit COMFYUI_SERVER in worker.js
+2. Deploy via dashboard or wrangler CLI
+3. Access at https://your-worker.workers.dev
+
+### Local ComfyUI Integration
+1. Copy PWA files to ComfyUI web directory
+2. Access at http://localhost:8188
+
+### iOS App Store
+1. Update bundle identifier and signing
+2. Archive and upload via Xcode
