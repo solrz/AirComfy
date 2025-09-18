@@ -56,14 +56,74 @@
                         <button @click="pasteFromClipboard" class="secondary-btn">
                             📋 Paste from Clipboard
                         </button>
+                        <button v-show="currentWorkflow && !showEditor" @click="toggleEditor" class="secondary-btn">
+                            ✏️ Edit Workflow
+                        </button>
+                        <button v-show="showEditor" @click="toggleEditor" class="tertiary-btn">
+                            👁️ View Raw JSON
+                        </button>
                         <button @click="clearWorkflow" class="tertiary-btn">Clear</button>
                     </div>
                     <input ref="fileInput" type="file" accept=".json" @change="handleFileUpload" style="display: none;">
                 </div>
-                <div v-show="currentWorkflow" class="workflow-preview">
+                
+                <!-- Workflow Editor -->
+                <div v-show="currentWorkflow && showEditor" class="workflow-editor">
+                    <h3>Workflow Editor</h3>
+                    <div class="editor-info">
+                        <small>Edit node values below. Changes will be applied when you execute the workflow.</small>
+                    </div>
+                    <div v-for="(node, nodeId) in workflowEditorData" :key="nodeId" class="node-editor">
+                        <div class="node-header">
+                            <span class="node-id">Node {{ nodeId }}</span>
+                            <span class="node-class">{{ node.class_type }}</span>
+                        </div>
+                        <div class="node-inputs">
+                            <div v-for="(value, inputName) in node.inputs" :key="inputName" class="input-field">
+                                <label :for="`${nodeId}-${inputName}`" class="input-label">
+                                    {{ inputName }}:
+                                </label>
+                                <div class="input-value">
+                                    <!-- Array input (connections) -->
+                                    <template v-if="Array.isArray(value)">
+                                        <span class="connection-value">→ Node {{ value[0] }}, Output {{ value[1] }}</span>
+                                    </template>
+                                    <!-- Boolean input -->
+                                    <template v-else-if="typeof value === 'boolean'">
+                                        <select :id="`${nodeId}-${inputName}`" 
+                                                @change="updateNodeValue(nodeId, inputName, $event.target.value === 'true')">
+                                            <option :selected="value === true" value="true">true</option>
+                                            <option :selected="value === false" value="false">false</option>
+                                        </select>
+                                    </template>
+                                    <!-- Number input -->
+                                    <template v-else-if="typeof value === 'number'">
+                                        <input :id="`${nodeId}-${inputName}`" 
+                                               type="number" 
+                                               :value="value" 
+                                               @input="updateNodeValue(nodeId, inputName, parseFloat($event.target.value))" 
+                                               class="editor-input">
+                                    </template>
+                                    <!-- Text input -->
+                                    <template v-else>
+                                        <input :id="`${nodeId}-${inputName}`" 
+                                               type="text" 
+                                               :value="value" 
+                                               @input="updateNodeValue(nodeId, inputName, $event.target.value)" 
+                                               class="editor-input">
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- JSON Preview (shown when not in editor mode) -->
+                <div v-show="currentWorkflow && !showEditor" class="workflow-preview">
                     <h3>Workflow Preview</h3>
                     <pre>{{ workflowPreview }}</pre>
                 </div>
+                
                 <div class="execution-actions">
                     <button @click="validateWorkflow" class="secondary-btn">Validate</button>
                     <button @click="executeWorkflow" :disabled="!canExecute" class="primary-btn">Execute</button>
@@ -141,6 +201,8 @@
                 resultImages: [],
                 newEndpoint: { name: '', url: '' },
                 debugMode: false,
+                showEditor: false,
+                workflowEditorData: null,
 
                 // Computed properties
                 get canExecute() {
@@ -433,6 +495,8 @@
 
                         this.currentWorkflow = workflow;
                         this.workflowStatus = source;
+                        this.workflowEditorData = null;  // Reset editor data when loading new workflow
+                        this.showEditor = false;  // Reset to JSON view
                         this.updateStatus('Workflow loaded successfully', 'success');
                     } catch (error) {
                         this.updateStatus(`Invalid workflow: ${error.message}`, 'error');
@@ -442,7 +506,29 @@
                 clearWorkflow() {
                     this.currentWorkflow = null;
                     this.workflowStatus = 'No workflow loaded';
+                    this.workflowEditorData = null;
+                    this.showEditor = false;
                     this.updateStatus('Workflow cleared', 'info');
+                },
+
+                toggleEditor() {
+                    if (!this.currentWorkflow) return;
+                    
+                    this.showEditor = !this.showEditor;
+                    
+                    if (this.showEditor && !this.workflowEditorData) {
+                        // Initialize editor data as a copy of the current workflow
+                        // Handle both wrapped and unwrapped workflow formats
+                        const workflowNodes = this.currentWorkflow.prompt || this.currentWorkflow;
+                        this.workflowEditorData = JSON.parse(JSON.stringify(workflowNodes));
+                    }
+                },
+
+                updateNodeValue(nodeId, inputName, newValue) {
+                    // Update the editor data (not the original workflow)
+                    if (this.workflowEditorData && this.workflowEditorData[nodeId]) {
+                        this.workflowEditorData[nodeId].inputs[inputName] = newValue;
+                    }
                 },
 
                 validateWorkflow() {
@@ -470,17 +556,22 @@
                         return;
                     }
 
+                    // Use editor data if available, otherwise use original workflow
+                    const workflowToSend = this.showEditor && this.workflowEditorData 
+                        ? this.workflowEditorData 
+                        : this.currentWorkflow;
+
                     // Check if workflow already has the correct structure
                     let promptData;
-                    if (this.currentWorkflow.prompt && this.currentWorkflow.client_id) {
+                    if (workflowToSend.prompt && workflowToSend.client_id) {
                         // Already in correct format (pre-wrapped)
-                        promptData = this.currentWorkflow;
+                        promptData = workflowToSend;
                         // Update client_id to current session
                         promptData.client_id = this.clientId;
                     } else {
                         // Raw workflow nodes - need to wrap
                         promptData = {
-                            prompt: this.currentWorkflow,
+                            prompt: workflowToSend,
                             client_id: this.clientId
                         };
                     }
