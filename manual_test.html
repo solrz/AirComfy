@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirComfy Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2196F3;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 10px;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+        .step strong {
+            color: #2196F3;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .warning {
+            color: #FF9800;
+            font-weight: bold;
+        }
+        .code {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+        }
+        a {
+            color: #2196F3;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 AirComfy Manual Upload Test</h1>
+
+    <div class="test-section">
+        <h2>📁 Test File Upload</h2>
+
+        <div class="step">
+            <strong>Step 1:</strong> Save this test workflow as <code>test-workflow.json</code>:
+        </div>
+
+        <div class="code">
+{
+  "3": {
+    "inputs": {
+      "seed": 123456789,
+      "steps": 20,
+      "cfg": 8,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1
+    },
+    "class_type": "KSampler"
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "model.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple"
+  },
+  "5": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage"
+  },
+  "6": {
+    "inputs": {
+      "text": "beautiful scenery nature",
+      "clip": ["4", 1]
+    },
+    "class_type": "CLIPTextEncode"
+  }
+}
+        </div>
+
+        <div class="step">
+            <button onclick="downloadTestFile()">💾 Download test-workflow.json</button>
+        </div>
+
+        <div class="step">
+            <strong>Step 2:</strong> Open AirComfy: <a href="http://localhost:8000" target="_blank">http://localhost:8000</a>
+        </div>
+
+        <div class="step">
+            <strong>Step 3:</strong> Click <span class="success">📁 Upload JSON</span> button
+        </div>
+
+        <div class="step">
+            <strong>Step 4:</strong> Select the downloaded <code>test-workflow.json</code> file
+        </div>
+
+        <div class="step">
+            <strong>Step 5:</strong> Verify:
+            <ul>
+                <li>✅ Workflow preview should appear</li>
+                <li>✅ Two tabs should be visible: "Preview" and "Editor"</li>
+                <li>✅ Click "Editor" tab to see node fields</li>
+                <li>✅ You should see 4 nodes with editable fields</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Test Clipboard Paste</h2>
+
+        <div class="step">
+            <strong>Step 1:</strong> Copy the workflow JSON above
+        </div>
+
+        <div class="step">
+            <strong>Step 2:</strong> Click <span class="success">📋 Paste from Clipboard</span> button
+        </div>
+
+        <div class="step">
+            <strong>Step 3:</strong> Workflow should load immediately
+        </div>
+
+        <div class="step">
+            <p class="warning">Note: Clipboard access may require browser permission</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>✅ Expected Results</h2>
+
+        <div class="step">
+            After uploading or pasting a workflow:
+            <ul>
+                <li>The workflow status should show "Uploaded: test-workflow.json" or "Pasted from clipboard"</li>
+                <li>The Preview tab should show the JSON structure</li>
+                <li>The Editor tab should show interactive fields for each node</li>
+                <li>You can modify values in the Editor</li>
+                <li>Changes are saved when you execute the workflow</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function downloadTestFile() {
+            const workflow = {
+                "3": {
+                    "inputs": {
+                        "seed": 123456789,
+                        "steps": 20,
+                        "cfg": 8,
+                        "sampler_name": "euler",
+                        "scheduler": "normal",
+                        "denoise": 1
+                    },
+                    "class_type": "KSampler"
+                },
+                "4": {
+                    "inputs": {
+                        "ckpt_name": "model.safetensors"
+                    },
+                    "class_type": "CheckpointLoaderSimple"
+                },
+                "5": {
+                    "inputs": {
+                        "width": 512,
+                        "height": 512,
+                        "batch_size": 1
+                    },
+                    "class_type": "EmptyLatentImage"
+                },
+                "6": {
+                    "inputs": {
+                        "text": "beautiful scenery nature",
+                        "clip": ["4", 1]
+                    },
+                    "class_type": "CLIPTextEncode"
+                }
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(workflow, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "test-workflow.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+    </script>
+</body>
+</html>

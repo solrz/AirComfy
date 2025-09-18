@@ -426,6 +426,147 @@ textarea {
     background: #E64A19;
 }
 
+/* Workflow Logs Styles */
+.workflow-logs-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e1e4e8;
+}
+
+.logs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.logs-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.logs-container {
+    max-height: 600px;
+    overflow-y: auto;
+    border: 1px solid #e1e4e8;
+    border-radius: 4px;
+    background: white;
+}
+
+.log-entry {
+    padding: 1rem;
+    border-bottom: 1px solid #e1e4e8;
+    transition: background-color 0.2s;
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-entry:hover {
+    background: #f6f8fa;
+}
+
+.log-entry.log-failed {
+    background: #fff5f5;
+}
+
+.log-entry.log-failed:hover {
+    background: #ffe5e5;
+}
+
+.log-entry.log-completed {
+    background: #f0f9ff;
+}
+
+.log-entry.log-completed:hover {
+    background: #e0f2fe;
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.log-timestamp {
+    font-size: 0.875rem;
+    color: #6a737d;
+}
+
+.log-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-submitted {
+    background: #fffbf0;
+    color: #f59e0b;
+    border: 1px solid #fbbf24;
+}
+
+.status-completed {
+    background: #d4f4e7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.status-failed {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+}
+
+.status-pending {
+    background: #e0e7ff;
+    color: #4f46e5;
+    border: 1px solid #a5b4fc;
+}
+
+.log-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.log-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.log-label {
+    font-size: 0.75rem;
+    color: #6a737d;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.log-value {
+    font-size: 0.875rem;
+    color: #24292e;
+    word-break: break-all;
+}
+
+.log-value.error-text {
+    color: #dc2626;
+    font-family: monospace;
+    font-size: 0.8rem;
+}
+
+.no-logs-message {
+    text-align: center;
+    padding: 2rem;
+    color: #6a737d;
+    font-style: italic;
+}
+
 @media (max-width: 768px) {
     header {
         flex-direction: column;
@@ -470,5 +611,326 @@ textarea {
 
     .view-header .secondary-btn {
         width: 100%;
+    }
+}
+
+/* Stats Button */
+.stats-btn {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #2196F3;
+    color: white;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    z-index: 1000;
+}
+
+.stats-btn:hover {
+    background: #1976D2;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Stats View */
+.stats-section {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.stats-content {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.stats-refresh {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.stats-timestamp {
+    color: #666;
+    font-size: 0.875rem;
+}
+
+.stats-display {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.stat-group {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+}
+
+.stat-group h3 {
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-weight: 500;
+    color: #555;
+}
+
+.stat-value {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    color: #333;
+}
+
+.device-info {
+    padding: 0.75rem;
+    background: white;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+}
+
+.device-info:last-child {
+    margin-bottom: 0;
+}
+
+.stats-raw {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+}
+
+.no-stats-message {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border: 1px dashed #ddd;
+}
+
+/* Workflow Editor Styles */
+.workflow-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.tab-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #666;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    color: #2196F3;
+}
+
+.tab-btn.active {
+    color: #2196F3;
+    border-bottom-color: #2196F3;
+}
+
+.workflow-preview-content {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+}
+
+.workflow-editor {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.editor-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.node-group {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.node-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.node-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.toggle-btn {
+    padding: 0.25rem 0.75rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    color: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.node-fields {
+    padding: 1rem;
+    background: white;
+}
+
+.field-group {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.field-group:last-child {
+    margin-bottom: 0;
+}
+
+.field-label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.875rem;
+    margin: 0;
+    word-break: break-word;
+}
+
+.field-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.field-input:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+.field-textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.field-textarea:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+.field-checkbox {
+    width: auto;
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+/* Node type specific colors */
+.node-group:has(.node-header:contains("KSampler")) .node-header {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.node-group:has(.node-header:contains("SaveImage")) .node-header {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.node-group:has(.node-header:contains("LoadImage")) .node-header {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.node-group:has(.node-header:contains("CLIPTextEncode")) .node-header {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.node-group:has(.node-header:contains("CheckpointLoader")) .node-header {
+    background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+}
+
+@media (max-width: 768px) {
+    .field-group {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .editor-controls {
+        flex-direction: column;
+    }
+
+    .workflow-editor {
+        max-height: 400px;
     }
 }

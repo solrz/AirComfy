@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Vue Buttons</title>
+    <script src="https://unpkg.com/petite-vue@0.4.1/dist/petite-vue.iife.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h2>Test Endpoint Management</h2>
+        <div v-for="endpoint in endpoints" :key="endpoint.id">
+            <span>{{ endpoint.name }} - {{ endpoint.url }}</span>
+            <button @click="editEndpoint(endpoint)">Edit</button>
+            <button @click="deleteEndpoint(endpoint.id)">Delete</button>
+        </div>
+    </div>
+
+    <script>
+        function TestApp() {
+            return {
+                endpoints: [
+                    { id: '1', name: 'Local', url: 'http://localhost:8188' },
+                    { id: '2', name: 'Remote', url: 'http://192.168.1.100:8188' }
+                ],
+
+                editEndpoint(endpoint) {
+                    console.log('Edit clicked for:', endpoint);
+                    alert('Edit: ' + endpoint.name);
+                },
+
+                deleteEndpoint(id) {
+                    console.log('Delete clicked for:', id);
+                    alert('Delete: ' + id);
+                }
+            };
+        }
+
+        const app = TestApp();
+        PetiteVue.createApp(app).mount('#app');
+    </script>
+</body>
+</html>

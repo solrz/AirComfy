@@ -20,6 +20,7 @@ AirComfy is a minimal Progressive Web App (PWA) and native iOS app for sending w
    - SwiftUI WebView wrapper loading PWA
    - CORSHandler.swift for proxying requests via comfyproxy:// scheme
    - ContentView.swift manages WebView lifecycle
+   - NOTE: iOS app does NOT currently bundle PWA files - needs to load from remote or local server
 
 3. **CORS Proxy Options**
    - proxy.py: Python aiohttp proxy with WebSocket support
@@ -30,32 +31,41 @@ AirComfy is a minimal Progressive Web App (PWA) and native iOS app for sending w
 
 ### PWA Development
 ```bash
-# Local development server
-python -m http.server 8000  # Serve PWA files from PWA/ directory
+# Local development server (run from project root)
+cd PWA && python -m http.server 8000
 
 # CORS proxy (required for ComfyUI API access from browser)
 python proxy.py --port 8080 --comfyui http://192.168.11.132:8188
 
-# Testing
-python test_aircomfy.py  # Full Selenium test suite
+# Run all tests
+python test_aircomfy.py
+
+# Debug mode tests
+python test_debug_mode.py
+
+# Button functionality tests
+python test_buttons.py
 ```
 
 ### iOS Development
 ```bash
 # Build for simulator
-xcodebuild -project iOS/AirComfy.xcodeproj -scheme AirComfy -sdk iphonesimulator -derivedDataPath build
+cd iOS && xcodebuild -project AirComfy.xcodeproj -scheme AirComfy -sdk iphonesimulator -derivedDataPath build
 
 # Build for device (requires proper signing)
-xcodebuild -project iOS/AirComfy.xcodeproj -scheme AirComfy -sdk iphoneos
+cd iOS && xcodebuild -project AirComfy.xcodeproj -scheme AirComfy -sdk iphoneos
 
 # Open in Xcode for debugging
 open iOS/AirComfy.xcodeproj
+
+# To bundle PWA files in iOS app (if needed in future):
+# Copy PWA files to iOS/AirComfy/ and update ContentView.swift to load from bundle
 ```
 
 ### Testing Requirements
 - Chrome/Chromium browser (for Selenium tests)
 - Python 3.7+ with selenium, webdriver-manager packages
-- Optional: webdriver-manager for automatic ChromeDriver management
+- webdriver-manager for automatic ChromeDriver management: `pip install webdriver-manager selenium`
 
 ## ComfyUI API Integration
 
@@ -64,16 +74,18 @@ open iOS/AirComfy.xcodeproj
 - `GET /history/{prompt_id}` - Fetch execution results
 - `GET /view` - Download generated images (params: filename, subfolder, type)
 - `WS /ws?clientId={id}` - Real-time progress updates
+- `GET /system_stats` - Get system resource usage (CPU, memory, GPU)
 
 ### Workflow Format
 ```json
 {
-  "nodes": {
+  "prompt": {
     "1": {
       "class_type": "LoadImage",
       "inputs": {}
     }
-  }
+  },
+  "client_id": "unique-client-id"
 }
 ```
 
@@ -87,43 +99,40 @@ open iOS/AirComfy.xcodeproj
 - **Template Directives**: `v-model`, `v-show`, `v-for`, `@click` for declarative UI
 - **Lifecycle**: `mounted()` hook initializes app state and service worker
 
-### Core Functionality
+### Core Features
+- **Debug Mode**: Toggle with debug button for verbose logging and preset endpoints
+- **System Stats**: View ComfyUI system resource usage (CPU, memory, GPU)
+- **Endpoint Manager**: Add/edit/delete ComfyUI server endpoints with persistence
 - **Connection Management**: Server endpoint selection and WebSocket communication
 - **Workflow Processing**: JSON upload, clipboard paste, validation, execution
-- **Endpoint Management**: CRUD operations for server endpoints with localStorage persistence
 - **Results Display**: Reactive image gallery from ComfyUI execution results
 - **Error Handling**: Reactive status messages with type-based styling
 
 ### CORS Solutions
-1. **Cloudflare Worker**: Deploy via worker.js, serves PWA and proxies API
+1. **Cloudflare Worker**: Deploy via PWA/worker.js, serves PWA and proxies API
 2. **Python Proxy**: proxy.py provides local CORS proxy with WebSocket support
 3. **iOS Native**: CORSHandler.swift converts comfyproxy:// to http:// with CORS headers
 
 ### iOS App Architecture (iOS/AirComfy/)
-- **ContentView.swift**: Main SwiftUI view with WebView container
+- **ContentView.swift**: Main SwiftUI view with WebView container, currently loads from http://localhost:8000
 - **CORSHandler.swift**: URL scheme handler for bypassing CORS restrictions
 - **AirComfyApp.swift**: App entry point
-- PWA files are bundled directly in iOS app for offline access
 - Uses WKWebView with custom URL scheme (comfyproxy://) for API requests
+- Currently requires PWA to be served separately (not bundled)
 
 ### PWA Requirements
 - HTTPS required for service worker registration
 - manifest.json defines app metadata and icons
 - sw.js implements cache-first strategy for offline support
 - petite-vue (4.1KB) loaded from CDN for minimal bundle size
+- style.css embedded directly in index.html for simplicity
 
 ## Testing
 
-### Selenium Tests (test_aircomfy.py)
-- Page load verification
-- UI element presence
-- Form interactions
-- Workflow validation
-- Connection handling
-- Responsive design
-- PWA features
-
-Run with: `python test_aircomfy.py`
+### Test Suites
+1. **test_aircomfy.py**: Main test suite covering all functionality
+2. **test_debug_mode.py**: Debug mode specific tests
+3. **test_buttons.py**: Button interaction and visibility tests
 
 ### Test Coverage
 - Page load and title verification
@@ -133,30 +142,33 @@ Run with: `python test_aircomfy.py`
 - Form validation and interaction
 - Responsive design across viewport sizes
 - PWA manifest and service worker registration
+- Debug mode toggle and presets
+- System stats modal functionality
 
 ## Deployment
 
 ### Cloudflare Worker
-1. Edit COMFYUI_SERVER in worker.js
+1. Edit COMFYUI_SERVER in PWA/worker.js
 2. Deploy via dashboard or wrangler CLI
 3. Access at https://your-worker.workers.dev
+4. See CLOUDFLARE_DEPLOY.md for detailed instructions
 
 ### Local ComfyUI Integration
 1. Copy PWA files to ComfyUI web directory
 2. Access at http://localhost:8188
 
 ### iOS App Store
-1. Update bundle identifier and signing in Xcode
-2. Archive and upload via Xcode
-3. Note: PWA files are bundled into iOS app, so updates require app resubmission
+1. Update ContentView.swift to load from bundled files or production URL
+2. Update bundle identifier and signing in Xcode
+3. Archive and upload via Xcode
 
 ## Development Workflow
 
 ### Making Changes to PWA
 1. Edit files in `PWA/` directory
-2. Test locally with `python -m http.server 8000`
+2. Test locally with `cd PWA && python -m http.server 8000`
 3. Run tests with `python test_aircomfy.py`
-4. For iOS: Copy changes to `iOS/AirComfy/` and rebuild
+4. For iOS: Ensure ContentView.swift points to correct PWA URL
 
 ### Vue Development Notes
 - Uses petite-vue for minimal overhead (4.1KB vs 34KB for Vue 3)
@@ -166,7 +178,13 @@ Run with: `python test_aircomfy.py`
 - Event handlers use `@click` instead of `addEventListener`
 
 ### iOS Development Notes
-- PWA files are duplicated in iOS bundle for offline access
-- Changes to PWA must be manually copied to iOS project
+- Currently loads PWA from external URL (http://localhost:8000)
 - CORSHandler enables direct ComfyUI API access without external proxy
-- WebView loads from local bundle, not remote server
+- Test on simulator first before device deployment
+- To bundle PWA files: copy to iOS/AirComfy/ and update ContentView.swift to use Bundle.main.url
+
+## Sample Workflows
+
+Example workflow files in repository:
+- **SD15-basicT2I.json**: Stable Diffusion 1.5 text-to-image workflow
+- **wan22-telltale-example.json**: Complex workflow example with multiple nodes
