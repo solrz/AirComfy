@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Workflow Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .instructions {
+            background: #e3f2fd;
+            border: 1px solid #2196F3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .instructions h2 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+        .instructions ol {
+            margin: 10px 0;
+        }
+        .instructions li {
+            margin: 8px 0;
+        }
+        .code {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Manual Test Instructions for Workflow Editor</h1>
+
+    <div class="instructions">
+        <h2>📋 Test Steps:</h2>
+        <ol>
+            <li>Open <a href="http://localhost:8000" target="_blank">http://localhost:8000</a> in a new tab</li>
+            <li>Open browser Developer Console (F12 or Cmd+Option+I)</li>
+            <li>Paste this test workflow in console and press Enter:</li>
+        </ol>
+
+        <div class="code" onclick="copyCode(this)">
+// Test workflow loading
+const testWorkflow = {
+    "3": {
+        "inputs": {
+            "seed": 123456789,
+            "steps": 20,
+            "cfg": 8,
+            "sampler_name": "euler",
+            "scheduler": "normal",
+            "denoise": 1,
+            "model": ["4", 0],
+            "positive": ["6", 0],
+            "negative": ["7", 0],
+            "latent_image": ["5", 0]
+        },
+        "class_type": "KSampler"
+    },
+    "4": {
+        "inputs": {
+            "ckpt_name": "v1-5-pruned.safetensors"
+        },
+        "class_type": "CheckpointLoaderSimple"
+    },
+    "5": {
+        "inputs": {
+            "width": 512,
+            "height": 512,
+            "batch_size": 1
+        },
+        "class_type": "EmptyLatentImage"
+    },
+    "6": {
+        "inputs": {
+            "text": "beautiful scenery nature",
+            "clip": ["4", 1]
+        },
+        "class_type": "CLIPTextEncode"
+    },
+    "7": {
+        "inputs": {
+            "text": "blurry, bad",
+            "clip": ["4", 1]
+        },
+        "class_type": "CLIPTextEncode"
+    }
+};
+
+// Get the Vue app
+const app = document.querySelector('body').__v_app || window.$app;
+if (!app) {
+    console.error('❌ Vue app not found! Make sure the page is loaded.');
+} else {
+    // Load the workflow
+    app.loadWorkflow(JSON.stringify(testWorkflow), 'Test Workflow');
+    console.log('✅ Workflow loaded');
+
+    // Check nodes were extracted
+    console.log('📦 Extracted nodes:', Object.keys(app.workflowNodes || {}));
+
+    // Switch to editor view
+    app.workflowViewMode = 'editor';
+    console.log('✅ Switched to editor view');
+
+    // Check if editor is visible
+    setTimeout(() => {
+        const editor = document.querySelector('.workflow-editor');
+        const nodeGroups = document.querySelectorAll('.node-group');
+        if (editor && nodeGroups.length > 0) {
+            console.log('✅ Editor is working! Found', nodeGroups.length, 'node groups');
+        } else {
+            console.log('❌ Editor not showing. Check the following:');
+            console.log('- Editor element exists:', !!editor);
+            console.log('- Node groups found:', nodeGroups.length);
+            console.log('- Current workflow:', !!app.currentWorkflow);
+            console.log('- Workflow nodes:', app.workflowNodes);
+        }
+    }, 500);
+}
+        </div>
+        <p><small>Click the code block to copy it to clipboard</small></p>
+
+        <h2>✅ Expected Results:</h2>
+        <ul>
+            <li>You should see <span class="success">two tabs</span>: "Preview" and "Editor"</li>
+            <li>The <span class="success">Editor tab</span> should be active</li>
+            <li>You should see <span class="success">5 colorful node groups</span> with fields</li>
+            <li>Each node should have a <span class="success">hide/show button</span></li>
+            <li>Fields should be <span class="success">editable</span></li>
+        </ul>
+
+        <h2>❌ If Editor Doesn't Show:</h2>
+        <ul>
+            <li>Check console for error messages</li>
+            <li>Try refreshing the page and running the test again</li>
+            <li>Make sure the PWA server is running on port 8000</li>
+        </ul>
+    </div>
+
+    <script>
+        function copyCode(element) {
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const original = element.style.background;
+                element.style.background = '#c8e6c9';
+                setTimeout(() => {
+                    element.style.background = original;
+                }, 500);
+            });
+        }
+    </script>
+</body>
+</html>

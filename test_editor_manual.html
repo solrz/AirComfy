@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Workflow Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        #output {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        iframe {
+            width: 100%;
+            height: 800px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Workflow Editor Test Page</h1>
+
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="loadTestWorkflow()">Load Test Workflow</button>
+        <button onclick="switchToEditor()">Switch to Editor Tab</button>
+        <button onclick="checkEditorState()">Check Editor State</button>
+        <button onclick="showDebugInfo()">Show Debug Info</button>
+    </div>
+
+    <div class="test-section">
+        <h2>AirComfy PWA</h2>
+        <iframe id="pwa-frame" src="http://localhost:8000"></iframe>
+    </div>
+
+    <div class="test-section">
+        <h2>Debug Output</h2>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        const testWorkflow = {
+            "3": {
+                "inputs": {
+                    "seed": 123456789,
+                    "steps": 20,
+                    "cfg": 8,
+                    "sampler_name": "euler",
+                    "scheduler": "normal",
+                    "denoise": 1,
+                    "model": ["4", 0],
+                    "positive": ["6", 0],
+                    "negative": ["7", 0],
+                    "latent_image": ["5", 0]
+                },
+                "class_type": "KSampler"
+            },
+            "4": {
+                "inputs": {
+                    "ckpt_name": "v1-5-pruned-emaonly.safetensors"
+                },
+                "class_type": "CheckpointLoaderSimple"
+            },
+            "5": {
+                "inputs": {
+                    "width": 512,
+                    "height": 512,
+                    "batch_size": 1
+                },
+                "class_type": "EmptyLatentImage"
+            },
+            "6": {
+                "inputs": {
+                    "text": "beautiful scenery",
+                    "clip": ["4", 1]
+                },
+                "class_type": "CLIPTextEncode"
+            },
+            "7": {
+                "inputs": {
+                    "text": "blurry, bad quality",
+                    "clip": ["4", 1]
+                },
+                "class_type": "CLIPTextEncode"
+            }
+        };
+
+        function getFrame() {
+            return document.getElementById('pwa-frame').contentWindow;
+        }
+
+        function log(message) {
+            const output = document.getElementById('output');
+            output.textContent += message + '\n';
+        }
+
+        function loadTestWorkflow() {
+            try {
+                const frame = getFrame();
+                const app = frame.document.querySelector('body').__v_app;
+
+                if (!app) {
+                    log('❌ Vue app not found');
+                    return;
+                }
+
+                const workflowJson = JSON.stringify(testWorkflow);
+                app.loadWorkflow(workflowJson, 'Test Workflow');
+                log('✅ Test workflow loaded');
+
+                // Check if workflow was loaded
+                if (app.currentWorkflow) {
+                    log(`✅ Workflow has ${Object.keys(app.currentWorkflow).length} nodes`);
+                }
+
+                // Check if nodes were extracted
+                if (app.workflowNodes) {
+                    log(`✅ Extracted ${Object.keys(app.workflowNodes).length} nodes to editor`);
+                }
+            } catch (e) {
+                log('❌ Error loading workflow: ' + e.message);
+            }
+        }
+
+        function switchToEditor() {
+            try {
+                const frame = getFrame();
+                const app = frame.document.querySelector('body').__v_app;
+
+                if (!app) {
+                    log('❌ Vue app not found');
+                    return;
+                }
+
+                app.workflowViewMode = 'editor';
+                log('✅ Switched to editor view');
+
+                // Check if editor is visible
+                setTimeout(() => {
+                    const editor = frame.document.querySelector('.workflow-editor');
+                    if (editor) {
+                        log('✅ Editor element found');
+                        const nodeGroups = frame.document.querySelectorAll('.node-group');
+                        log(`✅ Found ${nodeGroups.length} node groups in editor`);
+                    } else {
+                        log('❌ Editor element not found');
+                    }
+                }, 100);
+            } catch (e) {
+                log('❌ Error switching to editor: ' + e.message);
+            }
+        }
+
+        function checkEditorState() {
+            try {
+                const frame = getFrame();
+                const app = frame.document.querySelector('body').__v_app;
+
+                if (!app) {
+                    log('❌ Vue app not found');
+                    return;
+                }
+
+                log('\n=== Editor State ===');
+                log('Current view: ' + app.currentView);
+                log('Workflow view mode: ' + app.workflowViewMode);
+                log('Has workflow: ' + (app.currentWorkflow ? 'Yes' : 'No'));
+                log('Workflow nodes: ' + JSON.stringify(Object.keys(app.workflowNodes || {})));
+                log('Hidden nodes: ' + JSON.stringify(app.hiddenNodes || {}));
+
+                // Check DOM elements
+                const tabs = frame.document.querySelectorAll('.tab-btn');
+                log(`Tab buttons found: ${tabs.length}`);
+
+                const editorDiv = frame.document.querySelector('.workflow-editor');
+                log('Editor div exists: ' + (editorDiv ? 'Yes' : 'No'));
+                if (editorDiv) {
+                    log('Editor div visible: ' + (editorDiv.offsetParent !== null ? 'Yes' : 'No'));
+                }
+
+                const nodeGroups = frame.document.querySelectorAll('.node-group');
+                log(`Node groups in DOM: ${nodeGroups.length}`);
+            } catch (e) {
+                log('❌ Error checking state: ' + e.message);
+            }
+        }
+
+        function showDebugInfo() {
+            try {
+                const frame = getFrame();
+                const app = frame.document.querySelector('body').__v_app;
+
+                if (!app) {
+                    log('❌ Vue app not found');
+                    return;
+                }
+
+                log('\n=== Debug Info ===');
+                log('App data keys: ' + Object.keys(app).join(', '));
+
+                if (app.currentWorkflow) {
+                    log('\nCurrent Workflow:');
+                    log(JSON.stringify(app.currentWorkflow, null, 2).substring(0, 500) + '...');
+                }
+
+                if (app.workflowNodes) {
+                    log('\nWorkflow Nodes:');
+                    log(JSON.stringify(app.workflowNodes, null, 2).substring(0, 500) + '...');
+                }
+            } catch (e) {
+                log('❌ Error getting debug info: ' + e.message);
+            }
+        }
+
+        // Auto-load workflow after page loads
+        setTimeout(() => {
+            log('Page loaded. Ready for testing.');
+            log('Click "Load Test Workflow" to begin.');
+        }, 2000);
+    </script>
+</body>
+</html>
