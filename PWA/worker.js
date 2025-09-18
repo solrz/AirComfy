@@ -3,7 +3,7 @@
  * Proxies ComfyUI API requests with CORS headers and serves PWA files
  */
 
-const COMFYUI_SERVER = 'http://192.168.11.132:8188'; // Change this to your ComfyUI server
+const COMFYUI_SERVER = 'http://localhost:8188'; // Change this to your ComfyUI server URL
 
 // Whitelisted domains that can use this proxy (empty array = allow all)
 const ALLOWED_ORIGINS = [

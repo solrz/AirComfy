@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Simple CORS proxy for ComfyUI API access.
-Usage: python proxy.py [--port 8080] [--comfyui http://192.168.11.132:8188]
+Usage: python proxy.py [--port 8080] [--comfyui http://localhost:8188]
 """
 
 import argparse

@@ -20,7 +20,8 @@ AirComfy is a minimal Progressive Web App (PWA) and native iOS app for sending w
    - SwiftUI WebView wrapper loading PWA
    - CORSHandler.swift for proxying requests via comfyproxy:// scheme
    - ContentView.swift manages WebView lifecycle
-   - NOTE: iOS app does NOT currently bundle PWA files - needs to load from remote or local server
+   - **BUILD ISSUE**: iOS project has duplicate file references (PWA files and iOS/AirComfy files) causing build conflicts
+   - NOTE: iOS app bundles PWA files but ContentView.swift loads from http://localhost:8000
 
 3. **CORS Proxy Options**
    - proxy.py: Python aiohttp proxy with WebSocket support
@@ -35,7 +36,7 @@ AirComfy is a minimal Progressive Web App (PWA) and native iOS app for sending w
 cd PWA && python -m http.server 8000
 
 # CORS proxy (required for ComfyUI API access from browser)
-python proxy.py --port 8080 --comfyui http://192.168.11.132:8188
+python proxy.py --port 8080 --comfyui http://localhost:8188
 
 # Run all tests
 python test_aircomfy.py
@@ -49,23 +50,40 @@ python test_buttons.py
 
 ### iOS Development
 ```bash
-# Build for simulator
-cd iOS && xcodebuild -project AirComfy.xcodeproj -scheme AirComfy -sdk iphonesimulator -derivedDataPath build
+# Build for simulator (from project root)
+xcodebuild -project iOS/AirComfy.xcodeproj -scheme AirComfy -sdk iphonesimulator -derivedDataPath iOS/build
 
 # Build for device (requires proper signing)
-cd iOS && xcodebuild -project AirComfy.xcodeproj -scheme AirComfy -sdk iphoneos
+xcodebuild -project iOS/AirComfy.xcodeproj -scheme AirComfy -sdk iphoneos -derivedDataPath iOS/build
+
+# Clean build folder if encountering duplicate file errors
+rm -rf iOS/build
 
 # Open in Xcode for debugging
 open iOS/AirComfy.xcodeproj
 
-# To bundle PWA files in iOS app (if needed in future):
-# Copy PWA files to iOS/AirComfy/ and update ContentView.swift to load from bundle
+# Fix duplicate file references:
+# Remove duplicate PWA file references from iOS/AirComfy/ in Xcode project navigator
 ```
 
-### Testing Requirements
-- Chrome/Chromium browser (for Selenium tests)
+### Testing
+```bash
+# Install test dependencies
+pip install selenium webdriver-manager
+
+# Run main test suite
+python test_aircomfy.py
+
+# Run specific test suites
+python test_debug_mode.py  # Debug mode functionality
+python test_buttons.py     # Button interactions
+python test_workflow_editor.py  # Workflow editor
+python test_upload.py      # File upload functionality
+```
+
+**Requirements:**
+- Chrome/Chromium browser
 - Python 3.7+ with selenium, webdriver-manager packages
-- webdriver-manager for automatic ChromeDriver management: `pip install webdriver-manager selenium`
 
 ## ComfyUI API Integration
 
@@ -114,11 +132,12 @@ open iOS/AirComfy.xcodeproj
 3. **iOS Native**: CORSHandler.swift converts comfyproxy:// to http:// with CORS headers
 
 ### iOS App Architecture (iOS/AirComfy/)
-- **ContentView.swift**: Main SwiftUI view with WebView container, currently loads from http://localhost:8000
-- **CORSHandler.swift**: URL scheme handler for bypassing CORS restrictions
-- **AirComfyApp.swift**: App entry point
-- Uses WKWebView with custom URL scheme (comfyproxy://) for API requests
-- Currently requires PWA to be served separately (not bundled)
+- **ContentView.swift**: Main SwiftUI view with WebView container, loads from http://localhost:8000
+- **CORSHandler.swift**: URL scheme handler converting comfyproxy:// to http:// with CORS headers
+- **AirComfyApp.swift**: App entry point with SwiftUI lifecycle
+- Uses WKWebView with custom URL scheme handler for API proxying
+- PWA files are bundled but need to update ContentView.swift to use Bundle.main.url for production
+- **IMPORTANT**: Do NOT copy PWA files into iOS/AirComfy/ folder - they should only exist in PWA/ folder and be referenced from there in Copy Bundle Resources
 
 ### PWA Requirements
 - HTTPS required for service worker registration
@@ -127,23 +146,23 @@ open iOS/AirComfy.xcodeproj
 - petite-vue (4.1KB) loaded from CDN for minimal bundle size
 - style.css embedded directly in index.html for simplicity
 
-## Testing
+## High-Level Architecture
 
-### Test Suites
-1. **test_aircomfy.py**: Main test suite covering all functionality
-2. **test_debug_mode.py**: Debug mode specific tests
-3. **test_buttons.py**: Button interaction and visibility tests
+### Data Flow
+1. **User Input** → Vue reactive state (petite-vue) → ComfyUI API request
+2. **API Response** → WebSocket updates → Vue state updates → DOM updates
+3. **CORS Handling**: Browser → CORS Proxy (Python/Cloudflare/iOS) → ComfyUI Server
 
-### Test Coverage
-- Page load and title verification
-- UI element presence and functionality
-- Connection status and error handling
-- Workflow upload (file and clipboard)
-- Form validation and interaction
-- Responsive design across viewport sizes
-- PWA manifest and service worker registration
-- Debug mode toggle and presets
-- System stats modal functionality
+### State Management
+- All state in single Vue component (`AirComfyApp`)
+- LocalStorage for persistent endpoint configuration
+- WebSocket for real-time execution progress
+- No external state management libraries (zero-dependency principle)
+
+### Security Considerations
+- CORS proxy required for browser-to-ComfyUI communication
+- iOS app uses custom URL scheme to bypass CORS
+- No authentication/authorization (assumes trusted local network)
 
 ## Deployment
 
@@ -178,10 +197,14 @@ open iOS/AirComfy.xcodeproj
 - Event handlers use `@click` instead of `addEventListener`
 
 ### iOS Development Notes
-- Currently loads PWA from external URL (http://localhost:8000)
+- Currently loads PWA from http://localhost:8000 (change for production)
 - CORSHandler enables direct ComfyUI API access without external proxy
 - Test on simulator first before device deployment
-- To bundle PWA files: copy to iOS/AirComfy/ and update ContentView.swift to use Bundle.main.url
+- **Build Issues Fixed:**
+  - DO NOT copy PWA files into iOS/AirComfy/ folder - causes duplicate file errors
+  - PWA files should only exist in ../PWA/ folder and be referenced in Copy Bundle Resources
+  - If you see "Multiple commands produce" errors, check for duplicate files in iOS/AirComfy/
+  - ContentView.swift needs update to load bundled files: `Bundle.main.url(forResource: "index", withExtension: "html")`
 
 ## Sample Workflows
 

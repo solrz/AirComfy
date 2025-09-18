@@ -6,7 +6,7 @@ Deploy AirComfy PWA using Cloudflare Workers for free, global CORS proxy.
 
 1. **Edit worker.js**:
    ```javascript
-   const COMFYUI_SERVER = 'http://192.168.11.132:8188'; // Change to your ComfyUI URL
+   const COMFYUI_SERVER = 'http://your-comfyui-server:8188'; // Change to your ComfyUI URL
 
    // Optional: Whitelist specific domains (empty array = allow all)
    const ALLOWED_ORIGINS = [
