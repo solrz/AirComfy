@@ -44,9 +44,22 @@
 		BE34FE1A2E7AA715009F41D8 /* worker.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = worker.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		23DACC0F2E7DA1D600BAE0AF /* Exceptions for "AirComfy" folder in "AirComfy" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				index.html,
+			);
+			target = BE34FDC02E7A841E009F41D8 /* AirComfy */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BE34FDC32E7A841E009F41D8 /* AirComfy */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				23DACC0F2E7DA1D600BAE0AF /* Exceptions for "AirComfy" folder in "AirComfy" target */,
+			);
 			path = AirComfy;
 			sourceTree = "<group>";
 		};
